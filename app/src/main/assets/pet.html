@@ -7,8 +7,11 @@
   html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden;}
   #stage{position:relative;width:100%;height:100%;}
 
-  #petBox{position:absolute;right:2%;bottom:0;height:92%;width:42%;display:flex;align-items:flex-end;justify-content:center;transform-origin:50% 100%;}
-  #pet{height:100%;width:auto;max-width:100%;object-fit:contain;transform-origin:50% 100%;animation:xj-idle 3.4s infinite ease-in-out;}
+  #petBox{position:absolute;right:2%;bottom:0;height:92%;width:42%;transform-origin:50% 100%;}
+  .pose{position:absolute;bottom:0;right:0;height:100%;width:auto;max-width:100%;opacity:0;transition:opacity .22s;transform-origin:50% 100%;}
+  .pose.show{opacity:1;}
+  #pA{animation:xj-idle 3.4s infinite ease-in-out;}
+  #pB{animation:xj-idle 3.4s infinite ease-in-out;}
 
   @keyframes xj-idle{
     0%,100%{transform:translateY(0) rotate(0deg);}
@@ -44,7 +47,10 @@
 </head>
 <body>
 <div id="stage">
-  <div id="petBox"><img id="pet" src="pet.png" alt=""></div>
+  <div id="petBox">
+    <img id="pA" class="pose show" src="pet_idle.png" alt="">
+    <img id="pB" class="pose" src="pet_idle.png" alt="">
+  </div>
   <div id="bubbleWrap"><div id="bubble"></div></div>
 </div>
 <script>
@@ -55,14 +61,22 @@ var appLines = {
   "tv.danmaku.bili": ["又在看番", "带我一起", "看完歇会儿"],
   "com.taobao.taobao": ["又买？", "钱包看一眼", "买前说一声"],
   "com.tencent.tmgp.sgame": ["打完这局就停", "又开一把？", "输了别找我"],
-  "com.chaoxing.mobile": ["好好学习", "我不吵你", "加油"],
+  "com.chaoxing.mobile": ["好好学习", "我坐这儿陪你", "不急，慢慢来"],
   "com.android.camera": ["拍谁呢", "给我看一眼"]
 };
+var calmApps = ["com.chaoxing.mobile", "com.tencent.mm"];
 var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我", "疼"];
 var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
+var sleepLines = ["……呼", "别吵", "困", "我就眯一会儿"];
+
 var bubble = document.getElementById("bubble");
 var box = document.getElementById("petBox");
-var hideTimer = null;
+var pA = document.getElementById("pA");
+var pB = document.getElementById("pB");
+var hideTimer = null, poseTimer = null, blinkTimer = null;
+var front = pA, back = pB;
+var pose = "idle";
+var lastAct = Date.now();
 
 function say(text, style, ms) {
   bubble.className = "on" + (style ? " " + style : "");
@@ -76,28 +90,79 @@ function flash(cls, ms) {
   box.classList.add(cls);
   setTimeout(function () { box.classList.remove(cls); }, ms);
 }
+function setPose(name) {
+  if (pose === name) return;
+  pose = name;
+  var src = "pet_" + name + ".png";
+  back.onload = function () {
+    back.classList.add("show");
+    front.classList.remove("show");
+    var t = front;
+    front = back;
+    back = t;
+  };
+  back.src = src;
+}
+function backToIdle(ms) {
+  if (poseTimer) clearTimeout(poseTimer);
+  poseTimer = setTimeout(function () { setPose("idle"); }, ms);
+}
 function onTap() {
+  lastAct = Date.now();
+  if (pose === "sleep") {
+    setPose("idle");
+    say("醒了", "pink", 1600);
+    flash("xj-hop", 620);
+    backToIdle(1400);
+    return;
+  }
+  setPose("hi");
   say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
   flash("xj-hop", 620);
+  backToIdle(1700);
 }
 function switchApp(pkg) {
+  lastAct = Date.now();
   var lines = appLines[pkg];
+  var hot = (pkg === "com.tencent.mm" || pkg === "com.tencent.tmgp.sgame" || pkg === "com.xingin.xhs");
+  if (pose === "sleep") setPose("idle");
   if (lines) {
-    var hot = (pkg === "com.tencent.mm" || pkg === "com.tencent.tmgp.sgame" || pkg === "com.xingin.xhs");
     say(lines[Math.floor(Math.random() * lines.length)], hot ? "rage" : "pink", 3200);
-    if (hot) flash("xj-shake", 520);
   } else {
     say("你在用什么，没见过", "", 2200);
+  }
+  if (hot) {
+    setPose("mad");
+    flash("xj-shake", 520);
+    backToIdle(3400);
+  } else if (calmApps.indexOf(pkg) >= 0) {
+    setPose("sit");
+    backToIdle(9000);
+  } else {
+    setPose("hi");
+    backToIdle(1800);
   }
 }
 (function idleLoop() {
   setTimeout(function () {
-    if (bubble.className.indexOf("on") < 0) {
+    if (pose === "sleep") {
+      say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
+    } else if (bubble.className.indexOf("on") < 0) {
       say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
     }
     idleLoop();
   }, 20000 + Math.random() * 12000);
 })();
+setInterval(function () {
+  if (Date.now() - lastAct > 90000 && pose === "idle") {
+    setPose("sleep");
+  }
+}, 8000);
+setTimeout(function () {
+  setPose("hi");
+  say("来了", "pink", 1800);
+  backToIdle(2000);
+}, 2500);
 </script>
 </body>
 </html>
