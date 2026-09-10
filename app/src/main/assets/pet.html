@@ -6,29 +6,32 @@
 <style>
   html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden;}
   #stage{position:relative;width:100%;height:100%;}
-  #pet{position:absolute;left:0;bottom:0;width:100%;height:88%;display:block;image-rendering:pixelated;}
-  #bubble{position:absolute;left:50%;top:0;transform:translateX(-50%);max-width:97%;box-sizing:border-box;padding:4px 8px;border-radius:9px;background:rgba(255,255,255,.94);color:#333;font:11px/1.3 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .2s;word-break:break-word;}
+  #pet{position:absolute;right:0;bottom:0;width:46%;height:96%;display:block;image-rendering:pixelated;}
+  #bubble{position:absolute;left:0;top:50%;transform:translateY(-50%);max-width:60%;box-sizing:border-box;padding:5px 9px;border-radius:11px;background:rgba(255,255,255,.95);color:#3a3330;font:10.5px/1.25 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #bubble.on{opacity:1;}
+  #bubble::after{content:"";position:absolute;right:-4px;top:50%;margin-top:-4px;border:4px solid transparent;border-left-color:rgba(255,255,255,.95);}
   #bubble.pink{background:rgba(255,216,226,.96);color:#a62a52;}
+  #bubble.pink::after{border-left-color:rgba(255,216,226,.96);}
   #bubble.rage{background:rgba(255,206,206,.96);color:#9d1f1f;}
+  #bubble.rage::after{border-left-color:rgba(255,206,206,.96);}
 
-  .xj-body{transform-origin:7.5px 13px;animation:xj-bob 2.6s infinite ease-in-out;}
-  .xj-shad{transform-origin:7.5px 15.5px;animation:xj-shadow 2.6s infinite ease-in-out;}
-  .xj-eye{transform-origin:7.5px 9px;animation:xj-blink 3.2s infinite;}
-  .xj-tail{transform-origin:2.2px 12px;animation:xj-tail 1.9s infinite ease-in-out;}
-  .xj-tuft{transform-origin:7.5px 5.6px;animation:xj-tuft 3.6s infinite ease-in-out;}
-  .xj-larm{transform-origin:2px 10px;animation:xj-larm 2.6s infinite ease-in-out;}
-  .xj-rarm{transform-origin:13px 10px;animation:xj-rarm 2.6s infinite ease-in-out;}
-  .xj-blush{opacity:0;transition:opacity .25s;}
+  .xj-body{transform-origin:8px 14px;animation:xj-bob 2.6s infinite ease-in-out;}
+  .xj-shad{transform-origin:8px 16px;animation:xj-shadow 2.6s infinite ease-in-out;}
+  .xj-eye{transform-origin:7.75px 9.5px;animation:xj-blink 3.4s infinite;}
+  .xj-tail{transform-origin:13.4px 12.4px;animation:xj-tail 1.9s infinite ease-in-out;}
+  .xj-tuft{transform-origin:7.75px 6px;animation:xj-tuft 3.6s infinite ease-in-out;}
+  .xj-larm{transform-origin:2.3px 10.9px;animation:xj-larm 2.6s infinite ease-in-out;}
+  .xj-rarm{transform-origin:12.7px 10.9px;animation:xj-rarm 2.6s infinite ease-in-out;}
+  .xj-blush{opacity:.85;}
 
-  @keyframes xj-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-.45px);}}
-  @keyframes xj-shadow{0%,100%{transform:scaleX(1);opacity:.45;}50%{transform:scaleX(.96);opacity:.4;}}
+  @keyframes xj-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-.4px);}}
+  @keyframes xj-shadow{0%,100%{transform:scaleX(1);opacity:.4;}50%{transform:scaleX(.95);opacity:.34;}}
   @keyframes xj-blink{0%,45%,52%,100%{transform:scaleY(1);}48%{transform:scaleY(.12);}}
-  @keyframes xj-tail{0%,100%{transform:rotate(0);}50%{transform:rotate(-14deg);}}
+  @keyframes xj-tail{0%,100%{transform:rotate(0);}50%{transform:rotate(-16deg);}}
   @keyframes xj-tuft{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(6deg);}}
-  @keyframes xj-larm{0%,100%{transform:rotate(0);}50%{transform:rotate(7deg);}}
-  @keyframes xj-rarm{0%,100%{transform:rotate(0);}50%{transform:rotate(-7deg);}}
-  @keyframes xj-hop{0%{transform:translateY(0);}35%{transform:translateY(-3.2px);}70%{transform:translateY(0);}85%{transform:translateY(-.8px);}100%{transform:translateY(0);}}
+  @keyframes xj-larm{0%,100%{transform:rotate(0);}50%{transform:rotate(8deg);}}
+  @keyframes xj-rarm{0%,100%{transform:rotate(0);}50%{transform:rotate(-8deg);}}
+  @keyframes xj-hop{0%{transform:translateY(0);}35%{transform:translateY(-3.4px);}70%{transform:translateY(0);}85%{transform:translateY(-.9px);}100%{transform:translateY(0);}}
   .xj-hop{animation:xj-hop .55s ease-out;}
   @keyframes xj-shake{0%,100%{transform:translateX(0) rotate(0);}20%{transform:translateX(-.7px) rotate(-3deg);}40%{transform:translateX(.7px) rotate(3deg);}60%{transform:translateX(-.5px) rotate(-2deg);}80%{transform:translateX(.5px) rotate(2deg);}}
   .xj-shake{animation:xj-shake .5s ease-in-out;}
@@ -36,35 +39,41 @@
 </head>
 <body>
 <div id="stage">
-<svg id="pet" viewBox="-4 1 25 16" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  <rect class="xj-shad" x="3" y="15" width="9" height="1" fill="#000" opacity=".45"/>
+<svg id="pet" viewBox="-1 3 18.5 14" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <rect class="xj-shad" x="3.5" y="15.6" width="10" height="1" fill="#000" opacity=".4"/>
   <g class="xj-body">
-    <g fill="#F2916B">
-      <rect x="3" y="13" width="1" height="2"/>
-      <rect x="5" y="13" width="1" height="2"/>
-      <rect x="9" y="13" width="1" height="2"/>
-      <rect x="11" y="13" width="1" height="2"/>
-    </g>
     <g class="xj-tail" fill="#F2916B">
-      <rect x="0.5" y="11.2" width="1.8" height="1"/>
-      <rect x="-0.2" y="11.5" width="1" height="1"/>
+      <rect x="13.4" y="12" width="1.7" height=".9"/>
+      <rect x="14.6" y="11.1" width="1" height="1"/>
     </g>
-    <rect x="2" y="6" width="11" height="7" fill="#F2916B"/>
-    <rect x="2" y="11.6" width="11" height="1.4" fill="#E27E58"/>
-    <rect class="xj-larm" x="0" y="9" width="2" height="2" fill="#F2916B"/>
-    <rect class="xj-rarm" x="13" y="9" width="2" height="2" fill="#F2916B"/>
+    <rect x="2.5" y="6" width="11" height="8" fill="#F2916B"/>
+    <rect x="2.5" y="12" width="11" height="2" fill="#E9855F"/>
     <g class="xj-tuft" fill="#25201E">
-      <rect x="7" y="4.6" width="1" height="1.5"/>
+      <rect x="7.3" y="4.2" width=".9" height="1.9"/>
+    </g>
+    <g fill="#F2916B">
+      <rect x="1.8" y="5.6" width="1.1" height="1.7"/>
+      <rect x="12.1" y="5.6" width="1.1" height="1.7"/>
     </g>
     <g fill="#000">
-      <rect x="4" y="8" width="1" height="2"/>
-      <rect x="10" y="8" width="1" height="2"/>
+      <rect x="5" y="8.4" width="1.6" height="2.2"/>
+      <rect x="8.9" y="8.4" width="1.6" height="2.2"/>
     </g>
-    <g class="xj-blush" fill="#FF6F8B">
-      <rect x="2.9" y="10.3" width="1.3" height=".7" rx=".35"/>
-      <rect x="10.8" y="10.3" width="1.3" height=".7" rx=".35"/>
+    <g fill="#fff">
+      <rect x="5.4" y="8.8" width=".5" height=".5"/>
+      <rect x="9.3" y="8.8" width=".5" height=".5"/>
     </g>
-    <rect class="xj-mouth" x="6.4" y="10.9" width="2.2" height=".9" rx=".45" fill="#7a2230"/>
+    <g class="xj-blush" fill="#FF7A93">
+      <rect x="3.5" y="11" width="1.4" height=".8" rx=".4"/>
+      <rect x="10.1" y="11" width="1.4" height=".8" rx=".4"/>
+    </g>
+    <rect x="6.9" y="11.7" width="1.6" height=".8" rx=".4" fill="#7a2230"/>
+    <rect class="xj-larm" x="1" y="10.2" width="1.4" height="1.7" fill="#F2916B"/>
+    <rect class="xj-rarm" x="12.6" y="10.2" width="1.4" height="1.7" fill="#F2916B"/>
+    <g fill="#F2916B">
+      <rect x="4.4" y="14" width="1.7" height="1.6"/>
+      <rect x="8.4" y="14" width="1.7" height="1.6"/>
+    </g>
   </g>
 </svg>
 <div id="bubble"></div>
@@ -72,21 +81,22 @@
 <script>
 var appLines = {
   "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？"],
-  "com.tencent.mm": ["跟谁聊呢", "谁给你发消息", "置顶是我吗"],
-  "com.xingin.xhs": ["又看别人", "人家有我好看吗", "刷够了没"],
-  "tv.danmaku.bili": ["又在看番", "带我一起", "看完就歇"],
-  "com.taobao.taobao": ["又买？", "钱包看一眼", "买之前说一声"],
+  "com.tencent.mm": ["跟谁聊呢", "谁给你发的", "置顶是我吗"],
+  "com.xingxhs.xhs": ["又看别人", "有我好看吗", "刷够了没"],
+  "com.xingin.xhs": ["又看别人", "有我好看吗", "刷够了没"],
+  "tv.danmaku.bili": ["又在看番", "带我一起", "看完歇会儿"],
+  "com.taobao.taobao": ["又买？", "钱包看一眼", "买前说一声"],
   "com.tencent.tmgp.sgame": ["打完这局就停", "又开一把？", "输了别找我"],
   "com.chaoxing.mobile": ["好好学习", "我不吵你", "加油"],
   "com.android.camera": ["拍谁呢", "给我看一眼"]
 };
-var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我了", "疼"];
+var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我", "疼"];
 var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
 var bubble = document.getElementById("bubble");
 var pet = document.getElementById("pet");
 var body = pet.querySelector(".xj-body");
 var blush = pet.querySelector(".xj-blush");
-var hideTimer = null, blushTimer = null;
+var hideTimer = null;
 
 function say(text, style, ms) {
   bubble.className = "on" + (style ? " " + style : "");
@@ -103,9 +113,8 @@ function flash(cls, ms) {
 function onTap() {
   say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
   flash("xj-hop", 600);
-  blush.style.opacity = "1";
-  if (blushTimer) clearTimeout(blushTimer);
-  blushTimer = setTimeout(function () { blush.style.opacity = "0"; }, 1400);
+  blush.setAttribute("fill", "#FF4F72");
+  setTimeout(function () { blush.setAttribute("fill", "#FF7A93"); }, 1200);
 }
 function switchApp(pkg) {
   var lines = appLines[pkg];
@@ -114,7 +123,7 @@ function switchApp(pkg) {
     say(lines[Math.floor(Math.random() * lines.length)], hot ? "rage" : "pink", 3200);
     if (hot) flash("xj-shake", 520);
   } else {
-    say("你在用什么，我没见过", "", 2200);
+    say("你在用什么，没见过", "", 2200);
   }
 }
 (function idleLoop() {
