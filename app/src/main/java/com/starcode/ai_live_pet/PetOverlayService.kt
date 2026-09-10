@@ -76,7 +76,7 @@ class PetOverlayService : Service() {
         view.webViewClient = WebViewClient()
         view.loadUrl("file:///android_asset/pet.html")
 
-        view.setOnTouchListener { v, e ->
+        view.setOnTouchListener { touched, e ->
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     downRawX = e.rawX
@@ -92,7 +92,7 @@ class PetOverlayService : Service() {
                         params.x = startX + dx
                         params.y = startY + dy
                         try {
-                            wm.updateViewLayout(v, params)
+                            wm.updateViewLayout(touched, params)
                         } catch (t: Throwable) {
                         }
                     }
@@ -102,7 +102,7 @@ class PetOverlayService : Service() {
                     val dx = (e.rawX - downRawX).toInt()
                     val dy = (e.rawY - downRawY).toInt()
                     if (abs(dx) <= 10 && abs(dy) <= 10) {
-                        v.evaluateJavascript("onTap()", null)
+                        (touched as WebView).evaluateJavascript("onTap()", null)
                     }
                     true
                 }
