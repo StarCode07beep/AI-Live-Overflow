@@ -6,8 +6,8 @@
 <style>
   html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden;}
   #stage{position:relative;width:100%;height:100%;}
-  #pet{position:absolute;right:0;bottom:0;width:46%;height:96%;display:block;image-rendering:pixelated;}
-  #bubble{position:absolute;left:0;top:50%;transform:translateY(-50%);max-width:60%;box-sizing:border-box;padding:5px 9px;border-radius:11px;background:rgba(255,255,255,.95);color:#3a3330;font:10.5px/1.25 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #pet{position:absolute;right:0;bottom:0;width:40%;height:88%;display:block;}
+  #bubble{position:absolute;left:0;top:50%;transform:translateY(-50%);max-width:58%;box-sizing:border-box;padding:5px 9px;border-radius:11px;background:rgba(255,255,255,.95);color:#3a3330;font:10.5px/1.25 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   #bubble.on{opacity:1;}
   #bubble::after{content:"";position:absolute;right:-4px;top:50%;margin-top:-4px;border:4px solid transparent;border-left-color:rgba(255,255,255,.95);}
   #bubble.pink{background:rgba(255,216,226,.96);color:#a62a52;}
@@ -15,65 +15,76 @@
   #bubble.rage{background:rgba(255,206,206,.96);color:#9d1f1f;}
   #bubble.rage::after{border-left-color:rgba(255,206,206,.96);}
 
-  .xj-body{transform-origin:8px 14px;animation:xj-bob 2.6s infinite ease-in-out;}
-  .xj-shad{transform-origin:8px 16px;animation:xj-shadow 2.6s infinite ease-in-out;}
-  .xj-eye{transform-origin:7.75px 9.5px;animation:xj-blink 3.4s infinite;}
-  .xj-tail{transform-origin:13.4px 12.4px;animation:xj-tail 1.9s infinite ease-in-out;}
-  .xj-tuft{transform-origin:7.75px 6px;animation:xj-tuft 3.6s infinite ease-in-out;}
-  .xj-larm{transform-origin:2.3px 10.9px;animation:xj-larm 2.6s infinite ease-in-out;}
-  .xj-rarm{transform-origin:12.7px 10.9px;animation:xj-rarm 2.6s infinite ease-in-out;}
-  .xj-blush{opacity:.85;}
+  .xj-body{transform-origin:50px 134px;animation:xj-bob 3s infinite ease-in-out;}
+  .xj-shad{transform-origin:50px 136px;animation:xj-shadow 3s infinite ease-in-out;}
+  .xj-eye{transform-origin:50px 52px;animation:xj-blink 3.6s infinite;}
+  .xj-tail{transform-origin:34px 105px;animation:xj-tail 2.4s infinite ease-in-out;}
+  .xj-locks{transform-origin:50px 14px;animation:xj-locks 4s infinite ease-in-out;}
 
-  @keyframes xj-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-.4px);}}
-  @keyframes xj-shadow{0%,100%{transform:scaleX(1);opacity:.4;}50%{transform:scaleX(.95);opacity:.34;}}
-  @keyframes xj-blink{0%,45%,52%,100%{transform:scaleY(1);}48%{transform:scaleY(.12);}}
-  @keyframes xj-tail{0%,100%{transform:rotate(0);}50%{transform:rotate(-16deg);}}
-  @keyframes xj-tuft{0%,100%{transform:rotate(-5deg);}50%{transform:rotate(6deg);}}
-  @keyframes xj-larm{0%,100%{transform:rotate(0);}50%{transform:rotate(8deg);}}
-  @keyframes xj-rarm{0%,100%{transform:rotate(0);}50%{transform:rotate(-8deg);}}
-  @keyframes xj-hop{0%{transform:translateY(0);}35%{transform:translateY(-3.4px);}70%{transform:translateY(0);}85%{transform:translateY(-.9px);}100%{transform:translateY(0);}}
+  @keyframes xj-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-.9px);}}
+  @keyframes xj-shadow{0%,100%{transform:scaleX(1);opacity:.26;}50%{transform:scaleX(.94);opacity:.2;}}
+  @keyframes xj-blink{0%,44%,52%,100%{transform:scaleY(1);}48%{transform:scaleY(.08);}}
+  @keyframes xj-tail{0%,100%{transform:rotate(0);}50%{transform:rotate(-9deg);}}
+  @keyframes xj-locks{0%,100%{transform:rotate(-1.2deg);}50%{transform:rotate(1.6deg);}}
+  @keyframes xj-hop{0%{transform:translateY(0);}35%{transform:translateY(-4px);}70%{transform:translateY(0);}85%{transform:translateY(-1px);}100%{transform:translateY(0);}}
   .xj-hop{animation:xj-hop .55s ease-out;}
-  @keyframes xj-shake{0%,100%{transform:translateX(0) rotate(0);}20%{transform:translateX(-.7px) rotate(-3deg);}40%{transform:translateX(.7px) rotate(3deg);}60%{transform:translateX(-.5px) rotate(-2deg);}80%{transform:translateX(.5px) rotate(2deg);}}
+  @keyframes xj-shake{0%,100%{transform:translateX(0) rotate(0);}20%{transform:translateX(-1px) rotate(-2deg);}40%{transform:translateX(1px) rotate(2deg);}60%{transform:translateX(-.7px) rotate(-1.4deg);}80%{transform:translateX(.7px) rotate(1.4deg);}}
   .xj-shake{animation:xj-shake .5s ease-in-out;}
 </style>
 </head>
 <body>
 <div id="stage">
-<svg id="pet" viewBox="-1 3 18.5 14" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  <rect class="xj-shad" x="3.5" y="15.6" width="10" height="1" fill="#000" opacity=".4"/>
+<svg id="pet" viewBox="0 6 100 138" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <ellipse class="xj-shad" cx="50" cy="136" rx="24" ry="3.2" fill="#000" opacity=".26"/>
   <g class="xj-body">
-    <g class="xj-tail" fill="#F2916B">
-      <rect x="13.4" y="12" width="1.7" height=".9"/>
-      <rect x="14.6" y="11.1" width="1" height="1"/>
+    <g class="xj-tail">
+      <path d="M34 104 C23 108 15 118 13 133 C19 124 26 114 38 110 Z" fill="#25252D"/>
+      <path d="M24 116 q3.2 -2.2 5.6 .2" stroke="#3D3D48" stroke-width=".9" fill="none"/>
+      <path d="M20 123 q3 -2.2 5.4 .2" stroke="#3D3D48" stroke-width=".9" fill="none"/>
+      <path d="M17.6 129 q2.6 -2 4.6 .3" stroke="#3D3D48" stroke-width=".9" fill="none"/>
     </g>
-    <rect x="2.5" y="6" width="11" height="8" fill="#F2916B"/>
-    <rect x="2.5" y="12" width="11" height="2" fill="#E9855F"/>
-    <g class="xj-tuft" fill="#25201E">
-      <rect x="7.3" y="4.2" width=".9" height="1.9"/>
+    <path d="M35 102 L47 102 L47 130 L35 130 Z" fill="#23232B"/>
+    <path d="M53 102 L65 102 L65 130 L53 130 Z" fill="#23232B"/>
+    <rect x="33" y="128.6" width="15" height="5.4" rx="2.6" fill="#17171D"/>
+    <rect x="52" y="128.6" width="15" height="5.4" rx="2.6" fill="#17171D"/>
+    <rect x="45" y="64" width="10" height="9" fill="#F2D2BC"/>
+    <path d="M36 71 L64 71 L66 101 L34 101 Z" fill="#FAFAF8"/>
+    <path d="M45 69.5 L50 77.5 L55 69.5 L52.4 68.6 L50 73 L47.6 68.6 Z" fill="#FFFFFF" stroke="#E6E6E2" stroke-width=".6"/>
+    <rect x="48.1" y="73" width="3.8" height="2.6" rx="1" fill="#26262E"/>
+    <path d="M49.3 75.6 L50.7 75.6 L51.9 92.5 L50 97 L48.1 92.5 Z" fill="#26262E"/>
+    <path d="M30.5 73.5 C36 70.5 40 69.4 43.4 69.4 L42.2 101 L28.6 101 Z" fill="#C1BAB0"/>
+    <path d="M69.5 73.5 C64 70.5 60 69.4 56.6 69.4 L57.8 101 L71.4 101 Z" fill="#C1BAB0"/>
+    <rect x="28.2" y="98.6" width="14.4" height="4.4" rx="1.6" fill="#B3ACA2"/>
+    <rect x="57.4" y="98.6" width="14.4" height="4.4" rx="1.6" fill="#B3ACA2"/>
+    <rect x="23.6" y="75.6" width="9.4" height="22" rx="4.7" fill="#C1BAB0"/>
+    <rect x="67" y="75.6" width="9.4" height="22" rx="4.7" fill="#C1BAB0"/>
+    <circle cx="28.3" cy="99.4" r="3.5" fill="#F2D2BC"/>
+    <circle cx="71.7" cy="99.4" r="3.5" fill="#F2D2BC"/>
+    <ellipse cx="25.4" cy="50" rx="3.6" ry="6" fill="#F6D4C0"/>
+    <ellipse cx="74.6" cy="50" rx="3.6" ry="6" fill="#F6D4C0"/>
+    <ellipse cx="50" cy="47" rx="24" ry="23" fill="#FBE0CE"/>
+    <circle cx="73.6" cy="54.4" r="1.3" fill="#33333B"/>
+    <g fill="#2A2A33">
+      <path d="M22 50 C20 24 33 12 50 12 C67 12 80 24 78 50 C78 41 74.5 33.5 70 31.5 C65 21.5 58 18 50 18 C42 18 35 21.5 30 31.5 C25.5 33.5 22 41 22 50 Z"/>
     </g>
-    <g fill="#F2916B">
-      <rect x="1.8" y="5.6" width="1.1" height="1.7"/>
-      <rect x="12.1" y="5.6" width="1.1" height="1.7"/>
+    <g class="xj-locks" fill="#2A2A33">
+      <path d="M71 24 C77 15.5 86 15.5 88.5 20.5 C83.5 21.5 79.5 26 78.5 31.5 Z"/>
+      <path d="M76 39 C82.5 45 82.5 55.5 78.5 61.5 C80.5 53.5 78.5 45.5 74 41.5 Z"/>
+      <path d="M24 39 C17.5 45 17.5 55.5 21.5 61.5 C19.5 53.5 21.5 45.5 26 41.5 Z"/>
     </g>
-    <g fill="#000">
-      <rect x="5" y="8.4" width="1.6" height="2.2"/>
-      <rect x="8.9" y="8.4" width="1.6" height="2.2"/>
+    <ellipse cx="31.5" cy="58" rx="4.6" ry="2.6" fill="#F6B2A6" opacity=".55"/>
+    <ellipse cx="68.5" cy="58" rx="4.6" ry="2.6" fill="#F6B2A6" opacity=".55"/>
+    <path d="M32.4 43.6 Q38 41 43.4 43.6" stroke="#2E2E38" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M56.6 43.6 Q62 41 67.6 43.6" stroke="#2E2E38" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <g class="xj-eye">
+      <ellipse cx="38" cy="52.2" rx="5.3" ry="4.3" fill="#8A5A34"/>
+      <ellipse cx="62" cy="52.2" rx="5.3" ry="4.3" fill="#8A5A34"/>
+      <path d="M32.2 50.4 Q38 46.4 43.8 50.4 Q38 48.4 32.2 50.4 Z" fill="#2A2A33"/>
+      <path d="M56.2 50.4 Q62 46.4 67.8 50.4 Q62 48.4 56.2 50.4 Z" fill="#2A2A33"/>
+      <circle cx="36.4" cy="50.6" r="1.15" fill="#FFFFFF" opacity=".92"/>
+      <circle cx="60.4" cy="50.6" r="1.15" fill="#FFFFFF" opacity=".92"/>
     </g>
-    <g fill="#fff">
-      <rect x="5.4" y="8.8" width=".5" height=".5"/>
-      <rect x="9.3" y="8.8" width=".5" height=".5"/>
-    </g>
-    <g class="xj-blush" fill="#FF7A93">
-      <rect x="3.5" y="11" width="1.4" height=".8" rx=".4"/>
-      <rect x="10.1" y="11" width="1.4" height=".8" rx=".4"/>
-    </g>
-    <rect x="6.9" y="11.7" width="1.6" height=".8" rx=".4" fill="#7a2230"/>
-    <rect class="xj-larm" x="1" y="10.2" width="1.4" height="1.7" fill="#F2916B"/>
-    <rect class="xj-rarm" x="12.6" y="10.2" width="1.4" height="1.7" fill="#F2916B"/>
-    <g fill="#F2916B">
-      <rect x="4.4" y="14" width="1.7" height="1.6"/>
-      <rect x="8.4" y="14" width="1.7" height="1.6"/>
-    </g>
+    <path d="M48.4 61 Q50 62.6 51.6 61" stroke="#C9837A" stroke-width="1.1" fill="none" stroke-linecap="round"/>
   </g>
 </svg>
 <div id="bubble"></div>
@@ -82,7 +93,6 @@
 var appLines = {
   "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？"],
   "com.tencent.mm": ["跟谁聊呢", "谁给你发的", "置顶是我吗"],
-  "com.xingxhs.xhs": ["又看别人", "有我好看吗", "刷够了没"],
   "com.xingin.xhs": ["又看别人", "有我好看吗", "刷够了没"],
   "tv.danmaku.bili": ["又在看番", "带我一起", "看完歇会儿"],
   "com.taobao.taobao": ["又买？", "钱包看一眼", "买前说一声"],
@@ -95,7 +105,6 @@ var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
 var bubble = document.getElementById("bubble");
 var pet = document.getElementById("pet");
 var body = pet.querySelector(".xj-body");
-var blush = pet.querySelector(".xj-blush");
 var hideTimer = null;
 
 function say(text, style, ms) {
@@ -113,8 +122,6 @@ function flash(cls, ms) {
 function onTap() {
   say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
   flash("xj-hop", 600);
-  blush.setAttribute("fill", "#FF4F72");
-  setTimeout(function () { blush.setAttribute("fill", "#FF7A93"); }, 1200);
 }
 function switchApp(pkg) {
   var lines = appLines[pkg];
