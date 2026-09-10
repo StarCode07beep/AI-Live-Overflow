@@ -48,7 +48,7 @@ class PetOverlayService : Service() {
 
     private fun addPet() {
         val dm = resources.displayMetrics
-        val w = (90 * dm.density).toInt()
+        val w = (180 * dm.density).toInt()
         val h = (118 * dm.density).toInt()
 
         params = WindowManager.LayoutParams(
