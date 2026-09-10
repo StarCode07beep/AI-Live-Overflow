@@ -48,8 +48,8 @@ class PetOverlayService : Service() {
 
     private fun addPet() {
         val dm = resources.displayMetrics
-        val w = (220 * dm.density).toInt()
-        val h = (100 * dm.density).toInt()
+        val w = (150 * dm.density).toInt()
+        val h = (200 * dm.density).toInt()
 
         params = WindowManager.LayoutParams(
             w, h,
@@ -60,8 +60,8 @@ class PetOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = dm.widthPixels - w - (6 * dm.density).toInt()
-            y = (dm.heightPixels * 0.68).toInt()
+            x = dm.widthPixels - w + (34 * dm.density).toInt()
+            y = dm.heightPixels - h + (34 * dm.density).toInt()
         }
 
         val view = WebView(this).apply {
