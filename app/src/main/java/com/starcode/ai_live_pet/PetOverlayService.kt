@@ -196,7 +196,7 @@ class PetOverlayService : Service() {
         override fun run() {
             try {
                 if (walking && !dragging && web != null) {
-                    val speed = (4.6 * resources.displayMetrics.density)
+                    val speed = (3.0 * resources.displayMetrics.density)
                     val climbSpeed = (3.2 * resources.displayMetrics.density).toInt()
                     when (phase) {
                         0 -> {
