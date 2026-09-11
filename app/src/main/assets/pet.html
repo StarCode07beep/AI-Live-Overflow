@@ -13,10 +13,12 @@
   .pose.show{opacity:1;}
   .wpose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
   #petBox.stepping .pose{opacity:0;transition:none;}
-  #petBox.stepping #wA{animation:xj-wa .26s infinite;}
-  #petBox.stepping #wB{animation:xj-wb .26s infinite;}
+  #petBox.stepping #wA{animation:xj-wa .44s infinite;}
+  #petBox.stepping #wB{animation:xj-wb .44s infinite;}
   @keyframes xj-wa{0%,49%{opacity:1;}50%,100%{opacity:0;}}
   @keyframes xj-wb{0%,49%{opacity:0;}50%,100%{opacity:1;}}
+  #petBox.held{animation:xj-held .46s infinite ease-in-out;transform-origin:50% 18%;}
+  @keyframes xj-held{0%,100%{transform:rotate(-7deg) translateY(-5px);}50%{transform:rotate(7deg) translateY(-5px);}}
 
   #petBox.breath{animation:xj-idle 3.4s infinite ease-in-out;}
   @keyframes xj-idle{
@@ -88,6 +90,8 @@ var calmApps = ["com.chaoxing.mobile", "com.tencent.mm"];
 var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我", "疼"];
 var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
 var walkLines = ["溜达一圈", "看看你在干嘛", "让让", "过来看看"];
+var edgeLines = ["到头了", "没路了", "这堵墙挺好看", "回走"];
+var nightLines = ["几点了", "你还不睡", "眼睛闭上", "陪你熬"];
 var sleepLines = ["……呼", "别吵", "困", "我就眯一会儿"];
 
 var bubble = document.getElementById("bubble");
@@ -100,6 +104,7 @@ var front = pA, back = pB;
 var curPose = "idle";
 var mode = "stand";
 var stepIdx = 0;
+var tapCount = 0, tapTimer = null;
 var lastAct = Date.now();
 
 function say(text, style, ms) {
@@ -152,9 +157,46 @@ function stopWalk() {
   curPose = "";
   setPose("idle");
 }
+function isNight() {
+  var h = new Date().getHours();
+  return h >= 23 || h < 6;
+}
+function onLongPress() {
+  lastAct = Date.now();
+  if (mode === "walk") stopWalk();
+  setPose("hi");
+  say("你按着我干嘛", "pink", 2400);
+  flash("xj-hop", 620);
+  backToIdle(2000);
+}
+function onHold(on) {
+  if (on) {
+    box.classList.remove("breath", "stepping");
+    box.classList.add("held");
+    if (Math.random() < 0.7) say("放我下来", "pink", 1800);
+  } else {
+    box.classList.remove("held");
+    if (mode !== "walk") box.classList.add("breath");
+  }
+}
+function onEdge() {
+  if (mode !== "walk") return;
+  if (Math.random() < 0.4) say(edgeLines[Math.floor(Math.random() * edgeLines.length)], "", 1800);
+}
 function onTap() {
   lastAct = Date.now();
   if (mode === "walk") stopWalk();
+  tapCount++;
+  if (tapTimer) clearTimeout(tapTimer);
+  tapTimer = setTimeout(function () { tapCount = 0; }, 1600);
+  if (tapCount >= 3) {
+    tapCount = 0;
+    setPose("mad");
+    say("别戳了，疼", "rage", 2200);
+    flash("xj-shake", 520);
+    backToIdle(2400);
+    return;
+  }
   if (curPose === "sleep") {
     setPose("idle");
     say("醒了", "pink", 1600);
@@ -196,7 +238,11 @@ function switchApp(pkg) {
       if (curPose === "sleep") {
         say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
       } else if (bubble.className.indexOf("on") < 0) {
-        say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
+        if (isNight()) {
+          say(nightLines[Math.floor(Math.random() * nightLines.length)], "pink", 2600);
+        } else {
+          say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
+        }
       }
     }
     idleLoop();
