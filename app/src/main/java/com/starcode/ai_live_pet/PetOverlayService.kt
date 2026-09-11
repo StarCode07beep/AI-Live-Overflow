@@ -22,6 +22,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.app.NotificationCompat
 import kotlin.math.abs
+import kotlin.random.Random
 
 class PetOverlayService : Service() {
 
@@ -31,10 +32,21 @@ class PetOverlayService : Service() {
     private val handler = Handler(Looper.getMainLooper())
 
     private var lastPkg = ""
+    private var dragging = false
     private var downRawX = 0f
     private var downRawY = 0f
     private var startX = 0
     private var startY = 0
+
+    private var viewW = 0
+    private var viewH = 0
+    private var screenW = 0
+    private var screenH = 0
+
+    private var dir = -1
+    private var walking = false
+    private var walkEndAt = 0L
+    private var nextWalkAt = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -42,14 +54,22 @@ class PetOverlayService : Service() {
         super.onCreate()
         startForeground(NOTI_ID, buildNotification())
         wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val dm = resources.displayMetrics
+        screenW = dm.widthPixels
+        screenH = dm.heightPixels
         addPet()
         handler.postDelayed(pollTask, 3000)
+        nextWalkAt = System.currentTimeMillis() + 4000
+        handler.postDelayed(stepTask, 900)
+        handler.postDelayed(decideTask, 1200)
     }
 
     private fun addPet() {
         val dm = resources.displayMetrics
         val w = (180 * dm.density).toInt()
         val h = (118 * dm.density).toInt()
+        viewW = w
+        viewH = h
 
         params = WindowManager.LayoutParams(
             w, h,
@@ -83,14 +103,16 @@ class PetOverlayService : Service() {
                     downRawY = e.rawY
                     startX = params.x
                     startY = params.y
+                    dragging = true
+                    stopWalk()
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (e.rawX - downRawX).toInt()
                     val dy = (e.rawY - downRawY).toInt()
                     if (abs(dx) > 10 || abs(dy) > 10) {
-                        params.x = startX + dx
-                        params.y = startY + dy
+                        params.x = clampX(startX + dx)
+                        params.y = clampY(startY + dy)
                         try {
                             wm.updateViewLayout(touched, params)
                         } catch (t: Throwable) {
@@ -101,9 +123,11 @@ class PetOverlayService : Service() {
                 MotionEvent.ACTION_UP -> {
                     val dx = (e.rawX - downRawX).toInt()
                     val dy = (e.rawY - downRawY).toInt()
+                    dragging = false
                     if (abs(dx) <= 10 && abs(dy) <= 10) {
-                        (touched as WebView).evaluateJavascript("onTap()", null)
+                        sendJs("onTap()")
                     }
+                    nextWalkAt = System.currentTimeMillis() + 1500
                     true
                 }
                 else -> true
@@ -112,6 +136,92 @@ class PetOverlayService : Service() {
 
         web = view
         wm.addView(view, params)
+    }
+
+    private fun minX(): Int = -(viewW * 0.6).toInt()
+
+    private fun maxX(): Int = screenW - (viewW * 0.4).toInt()
+
+    private fun clampX(v: Int): Int = when {
+        v < minX() -> minX()
+        v > maxX() -> maxX()
+        else -> v
+    }
+
+    private fun clampY(v: Int): Int {
+        val minY = 0
+        val maxY = screenH - (viewH * 0.45).toInt()
+        return when {
+            v < minY -> minY
+            v > maxY -> maxY
+            else -> v
+        }
+    }
+
+    private fun sendJs(code: String) {
+        web?.let {
+            try {
+                it.evaluateJavascript(code, null)
+            } catch (t: Throwable) {
+            }
+        }
+    }
+
+    private val stepTask = object : Runnable {
+        override fun run() {
+            try {
+                if (walking && !dragging && web != null) {
+                    val speed = (3.2 * resources.displayMetrics.density)
+                    val nx = params.x + (dir * speed).toInt()
+                    if (nx <= minX()) {
+                        params.x = minX()
+                        dir = 1
+                        sendJs("setFacing(1)")
+                    } else if (nx >= maxX()) {
+                        params.x = maxX()
+                        dir = -1
+                        sendJs("setFacing(-1)")
+                    } else {
+                        params.x = nx
+                    }
+                    try {
+                        wm.updateViewLayout(web, params)
+                    } catch (t: Throwable) {
+                    }
+                    if (System.currentTimeMillis() >= walkEndAt) {
+                        stopWalk()
+                    }
+                }
+            } catch (t: Throwable) {
+            }
+            handler.postDelayed(this, 40)
+        }
+    }
+
+    private val decideTask = object : Runnable {
+        override fun run() {
+            val now = System.currentTimeMillis()
+            if (!dragging && !walking && now >= nextWalkAt) {
+                startWalk()
+            }
+            handler.postDelayed(this, 1200)
+        }
+    }
+
+    private fun startWalk() {
+        if (walking) return
+        walking = true
+        dir = if (Random.nextBoolean()) -1 else 1
+        walkEndAt = System.currentTimeMillis() + Random.nextLong(2600, 6200)
+        sendJs("setFacing($dir)")
+        sendJs("startWalk()")
+    }
+
+    private fun stopWalk() {
+        if (!walking) return
+        walking = false
+        sendJs("stopWalk()")
+        nextWalkAt = System.currentTimeMillis() + Random.nextLong(2600, 9000)
     }
 
     private val pollTask = object : Runnable {
