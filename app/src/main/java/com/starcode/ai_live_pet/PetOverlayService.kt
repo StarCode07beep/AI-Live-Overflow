@@ -196,13 +196,13 @@ class PetOverlayService : Service() {
         override fun run() {
             try {
                 if (walking && !dragging && web != null) {
-                    val speed = (2.5 * resources.displayMetrics.density)
+                    val speed = (4.6 * resources.displayMetrics.density)
                     val climbSpeed = (3.2 * resources.displayMetrics.density).toInt()
                     when (phase) {
                         0 -> {
                             val nx = params.x + (dir * speed).toInt()
                             if (nx <= minX()) {
-                                if (Random.nextFloat() < 0.45f) {
+                                if (Random.nextFloat() < 0.0f) {
                                     startClimb(-1)
                                 } else {
                                     params.x = minX()
@@ -211,7 +211,7 @@ class PetOverlayService : Service() {
                                     sendJs("onEdge()")
                                 }
                             } else if (nx >= maxX()) {
-                                if (Random.nextFloat() < 0.45f) {
+                                if (Random.nextFloat() < 0.0f) {
                                     startClimb(1)
                                 } else {
                                     params.x = maxX()
