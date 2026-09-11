@@ -33,6 +33,9 @@ class PetOverlayService : Service() {
 
     private var lastPkg = ""
     private var dragging = false
+    private var moved = false
+    private var holding = false
+    private var downAt = 0L
     private var downRawX = 0f
     private var downRawY = 0f
     private var startX = 0
@@ -103,7 +106,10 @@ class PetOverlayService : Service() {
                     downRawY = e.rawY
                     startX = params.x
                     startY = params.y
+                    downAt = System.currentTimeMillis()
                     dragging = true
+                    moved = false
+                    holding = false
                     stopWalk()
                     true
                 }
@@ -111,6 +117,11 @@ class PetOverlayService : Service() {
                     val dx = (e.rawX - downRawX).toInt()
                     val dy = (e.rawY - downRawY).toInt()
                     if (abs(dx) > 10 || abs(dy) > 10) {
+                        if (!moved) {
+                            moved = true
+                            holding = true
+                            sendJs("onHold(true)")
+                        }
                         params.x = clampX(startX + dx)
                         params.y = clampY(startY + dy)
                         try {
@@ -123,10 +134,20 @@ class PetOverlayService : Service() {
                 MotionEvent.ACTION_UP -> {
                     val dx = (e.rawX - downRawX).toInt()
                     val dy = (e.rawY - downRawY).toInt()
+                    val heldMs = System.currentTimeMillis() - downAt
                     dragging = false
-                    if (abs(dx) <= 10 && abs(dy) <= 10) {
-                        sendJs("onTap()")
+                    if (holding) {
+                        holding = false
+                        sendJs("onHold(false)")
                     }
+                    if (abs(dx) <= 10 && abs(dy) <= 10) {
+                        if (heldMs > 700) {
+                            sendJs("onLongPress()")
+                        } else {
+                            sendJs("onTap()")
+                        }
+                    }
+                    moved = false
                     nextWalkAt = System.currentTimeMillis() + 4000
                     true
                 }
@@ -171,16 +192,18 @@ class PetOverlayService : Service() {
         override fun run() {
             try {
                 if (walking && !dragging && web != null) {
-                    val speed = (3.8 * resources.displayMetrics.density)
+                    val speed = (3.4 * resources.displayMetrics.density)
                     val nx = params.x + (dir * speed).toInt()
                     if (nx <= minX()) {
                         params.x = minX()
                         dir = 1
                         sendJs("setFacing(1)")
+                        sendJs("onEdge()")
                     } else if (nx >= maxX()) {
                         params.x = maxX()
                         dir = -1
                         sendJs("setFacing(-1)")
+                        sendJs("onEdge()")
                     } else {
                         params.x = nx
                     }
