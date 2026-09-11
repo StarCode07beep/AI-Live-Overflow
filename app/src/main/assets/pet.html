@@ -7,16 +7,21 @@
   html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden;}
   #stage{position:relative;width:100%;height:100%;}
 
-  #petBox{position:absolute;right:0;bottom:0;width:50%;height:100%;transform-origin:70% 100%;}
-  .pose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:fill;opacity:0;transition:opacity .22s;transform-origin:70% 100%;}
+  #petBox{position:absolute;right:0;bottom:0;width:56%;height:100%;transform-origin:50% 100%;}
+  #face{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:50% 100%;}
+  .pose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;transition:opacity .16s;transform-origin:50% 100%;}
   .pose.show{opacity:1;}
-  #pA{animation:xj-idle 3.4s infinite ease-in-out;}
-  #pB{animation:xj-idle 3.4s infinite ease-in-out;}
 
+  #petBox.breath{animation:xj-idle 3.4s infinite ease-in-out;}
   @keyframes xj-idle{
     0%,100%{transform:translateY(0) rotate(0deg);}
     25%{transform:translateY(-2.4px) rotate(-.8deg);}
     75%{transform:translateY(-1.2px) rotate(.8deg);}
+  }
+  #petBox.stepping{animation:xj-step .26s infinite ease-in-out;}
+  @keyframes xj-step{
+    0%,100%{transform:translateY(0) scaleY(1);}
+    42%{transform:translateY(-2.6px) scaleY(1.012);}
   }
   @keyframes xj-hop{
     0%{transform:translateY(0) scale(1);}
@@ -35,7 +40,7 @@
   }
   #petBox.xj-shake{animation:xj-shake .5s ease-in-out;}
 
-  #bubbleWrap{position:absolute;right:50%;top:40%;transform:translateY(-50%);width:50%;display:flex;justify-content:flex-end;pointer-events:none;}
+  #bubbleWrap{position:absolute;right:56%;top:44%;transform:translateY(-50%);width:44%;display:flex;justify-content:flex-end;pointer-events:none;}
   #bubble{position:relative;max-width:100%;box-sizing:border-box;padding:5px 9px;border-radius:11px;background:rgba(255,255,255,.95);color:#3a3330;font:10.5px/1.3 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:normal;word-break:break-word;}
   #bubble.on{opacity:1;}
   #bubble::after{content:"";position:absolute;right:-4px;top:50%;margin-top:-4px;border:4px solid transparent;border-left-color:rgba(255,255,255,.95);}
@@ -47,13 +52,20 @@
 </head>
 <body>
 <div id="stage">
-  <div id="petBox">
-    <img id="pA" class="pose show" src="pet_idle.png" alt="">
-    <img id="pB" class="pose" src="pet_idle.png" alt="">
+  <div id="petBox" class="breath">
+    <div id="face">
+      <img id="pA" class="pose show" src="pet_idle.png" alt="">
+      <img id="pB" class="pose" src="pet_idle.png" alt="">
+    </div>
   </div>
   <div id="bubbleWrap"><div id="bubble"></div></div>
 </div>
 <script>
+var IMG = {
+  idle: "pet_idle.png", hi: "pet_hi.png", mad: "pet_mad.png",
+  sit: "pet_sit.png", sleep: "pet_sleep.png",
+  walkA: "walkA.png", walkB: "walkB.png"
+};
 var appLines = {
   "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？"],
   "com.tencent.mm": ["跟谁聊呢", "谁给你发的", "置顶是我吗"],
@@ -67,15 +79,19 @@ var appLines = {
 var calmApps = ["com.chaoxing.mobile", "com.tencent.mm"];
 var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我", "疼"];
 var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
+var walkLines = ["溜达一圈", "看看你在干嘛", "让让", "过来看看"];
 var sleepLines = ["……呼", "别吵", "困", "我就眯一会儿"];
 
 var bubble = document.getElementById("bubble");
 var box = document.getElementById("petBox");
+var face = document.getElementById("face");
 var pA = document.getElementById("pA");
 var pB = document.getElementById("pB");
-var hideTimer = null, poseTimer = null;
+var hideTimer = null, poseTimer = null, walkTimer = null;
 var front = pA, back = pB;
-var pose = "idle";
+var curPose = "idle";
+var mode = "stand";
+var stepIdx = 0;
 var lastAct = Date.now();
 
 function say(text, style, ms) {
@@ -91,8 +107,8 @@ function flash(cls, ms) {
   setTimeout(function () { box.classList.remove(cls); }, ms);
 }
 function setPose(name) {
-  if (pose === name) return;
-  pose = name;
+  if (curPose === name) return;
+  curPose = name;
   back.onload = function () {
     back.classList.add("show");
     front.classList.remove("show");
@@ -100,15 +116,44 @@ function setPose(name) {
     front = back;
     back = t;
   };
-  back.src = "pet_" + name + ".png";
+  back.src = IMG[name];
 }
 function backToIdle(ms) {
   if (poseTimer) clearTimeout(poseTimer);
-  poseTimer = setTimeout(function () { setPose("idle"); }, ms);
+  poseTimer = setTimeout(function () {
+    if (mode !== "walk") setPose("idle");
+  }, ms);
+}
+function setFacing(d) {
+  face.style.transform = (d > 0) ? "scaleX(-1)" : "scaleX(1)";
+}
+function startWalk() {
+  if (mode === "walk") return;
+  mode = "walk";
+  if (poseTimer) clearTimeout(poseTimer);
+  box.classList.remove("breath", "xj-hop", "xj-shake");
+  box.classList.add("stepping");
+  stepIdx = 0;
+  setPose("walkA");
+  if (walkTimer) clearInterval(walkTimer);
+  walkTimer = setInterval(function () {
+    stepIdx = 1 - stepIdx;
+    setPose(stepIdx ? "walkB" : "walkA");
+  }, 130);
+  if (Math.random() < 0.18) say(walkLines[Math.floor(Math.random() * walkLines.length)], "", 1800);
+}
+function stopWalk() {
+  if (mode !== "walk") return;
+  mode = "stand";
+  if (walkTimer) { clearInterval(walkTimer); walkTimer = null; }
+  box.classList.remove("stepping");
+  box.classList.add("breath");
+  setPose("idle");
 }
 function onTap() {
   lastAct = Date.now();
-  if (pose === "sleep") {
+  if (mode === "walk") stopWalk();
+  if (curPose === "sleep") {
     setPose("idle");
     say("醒了", "pink", 1600);
     flash("xj-hop", 620);
@@ -122,9 +167,10 @@ function onTap() {
 }
 function switchApp(pkg) {
   lastAct = Date.now();
+  if (mode === "walk") return;
   var lines = appLines[pkg];
   var hot = (pkg === "com.tencent.mm" || pkg === "com.tencent.tmgp.sgame" || pkg === "com.xingin.xhs");
-  if (pose === "sleep") setPose("idle");
+  if (curPose === "sleep") setPose("idle");
   if (lines) {
     say(lines[Math.floor(Math.random() * lines.length)], hot ? "rage" : "pink", 3200);
   } else {
@@ -144,16 +190,18 @@ function switchApp(pkg) {
 }
 (function idleLoop() {
   setTimeout(function () {
-    if (pose === "sleep") {
-      say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
-    } else if (bubble.className.indexOf("on") < 0) {
-      say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
+    if (mode !== "walk") {
+      if (curPose === "sleep") {
+        say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
+      } else if (bubble.className.indexOf("on") < 0) {
+        say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
+      }
     }
     idleLoop();
   }, 20000 + Math.random() * 12000);
 })();
 setInterval(function () {
-  if (Date.now() - lastAct > 90000 && pose === "idle") {
+  if (mode !== "walk" && Date.now() - lastAct > 90000 && curPose === "idle") {
     setPose("sleep");
   }
 }, 8000);
