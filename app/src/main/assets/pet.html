@@ -13,12 +13,12 @@
   .pose.show{opacity:1;}
   .wpose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
   #petBox.stepping .pose{opacity:0;transition:none;}
-  #petBox.stepping #wA{animation:xj-wa .44s infinite;}
-  #petBox.stepping #wB{animation:xj-wb .44s infinite;}
+  #petBox.stepping #wA{animation:xj-wa .6s infinite;}
+  #petBox.stepping #wB{animation:xj-wb .6s infinite;}
   @keyframes xj-wa{0%,49%{opacity:1;}50%,100%{opacity:0;}}
   @keyframes xj-wb{0%,49%{opacity:0;}50%,100%{opacity:1;}}
-  #petBox.held{animation:xj-held .46s infinite ease-in-out;transform-origin:50% 18%;}
-  @keyframes xj-held{0%,100%{transform:rotate(-7deg) translateY(-5px);}50%{transform:rotate(7deg) translateY(-5px);}}
+  #petBox.held{animation:xj-held 1.7s infinite ease-in-out;transform-origin:50% 22%;}
+  @keyframes xj-held{0%,100%{transform:rotate(-4deg) translateY(-3px);}50%{transform:rotate(4deg) translateY(-3px);}}
 
   #petBox.breath{animation:xj-idle 3.4s infinite ease-in-out;}
   @keyframes xj-idle{
@@ -74,7 +74,7 @@
 var IMG = {
   idle: "pet_idle.png", hi: "pet_hi.png", mad: "pet_mad.png",
   sit: "pet_sit.png", sleep: "pet_sleep.png",
-  walkA: "walkA.png", walkB: "walkB.png"
+  walkA: "walkA.png", walkB: "walkB.png", hold: "hold.png"
 };
 var appLines = {
   "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？"],
@@ -172,11 +172,17 @@ function onLongPress() {
 function onHold(on) {
   if (on) {
     box.classList.remove("breath", "stepping");
+    curPose = "";
+    setPose("hold");
     box.classList.add("held");
     if (Math.random() < 0.7) say("放我下来", "pink", 1800);
   } else {
     box.classList.remove("held");
-    if (mode !== "walk") box.classList.add("breath");
+    curPose = "";
+    if (mode !== "walk") {
+      box.classList.add("breath");
+      setPose("idle");
+    }
   }
 }
 function onEdge() {
