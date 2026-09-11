@@ -137,8 +137,18 @@ function backToIdle(ms) {
     if (mode !== "walk") setPose("idle");
   }, ms);
 }
+var facingDir = -1;
+var rotDeg = 0;
+function applyFace() {
+  face.style.transform = "rotate(" + rotDeg + "deg)" + (facingDir > 0 ? " scaleX(-1)" : " scaleX(1)");
+}
 function setFacing(d) {
-  face.style.transform = (d > 0) ? "scaleX(-1)" : "scaleX(1)";
+  facingDir = d;
+  applyFace();
+}
+function setRotate(d) {
+  rotDeg = d;
+  applyFace();
 }
 function startWalk() {
   if (mode === "walk") return;
