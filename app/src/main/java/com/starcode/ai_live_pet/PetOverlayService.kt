@@ -192,7 +192,7 @@ class PetOverlayService : Service() {
         override fun run() {
             try {
                 if (walking && !dragging && web != null) {
-                    val speed = (3.4 * resources.displayMetrics.density)
+                    val speed = (2.5 * resources.displayMetrics.density)
                     val nx = params.x + (dir * speed).toInt()
                     if (nx <= minX()) {
                         params.x = minX()
