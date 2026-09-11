@@ -59,7 +59,7 @@ class PetOverlayService : Service() {
         screenH = dm.heightPixels
         addPet()
         handler.postDelayed(pollTask, 3000)
-        nextWalkAt = System.currentTimeMillis() + 4000
+        nextWalkAt = System.currentTimeMillis() + 9000
         handler.postDelayed(stepTask, 900)
         handler.postDelayed(decideTask, 1200)
     }
@@ -127,7 +127,7 @@ class PetOverlayService : Service() {
                     if (abs(dx) <= 10 && abs(dy) <= 10) {
                         sendJs("onTap()")
                     }
-                    nextWalkAt = System.currentTimeMillis() + 1500
+                    nextWalkAt = System.currentTimeMillis() + 4000
                     true
                 }
                 else -> true
@@ -140,7 +140,7 @@ class PetOverlayService : Service() {
 
     private fun minX(): Int = -(viewW * 0.6).toInt()
 
-    private fun maxX(): Int = screenW - (viewW * 0.4).toInt()
+    private fun maxX(): Int = screenW - (viewW * 0.92).toInt()
 
     private fun clampX(v: Int): Int = when {
         v < minX() -> minX()
@@ -171,7 +171,7 @@ class PetOverlayService : Service() {
         override fun run() {
             try {
                 if (walking && !dragging && web != null) {
-                    val speed = (3.2 * resources.displayMetrics.density)
+                    val speed = (3.8 * resources.displayMetrics.density)
                     val nx = params.x + (dir * speed).toInt()
                     if (nx <= minX()) {
                         params.x = minX()
@@ -194,7 +194,7 @@ class PetOverlayService : Service() {
                 }
             } catch (t: Throwable) {
             }
-            handler.postDelayed(this, 40)
+            handler.postDelayed(this, 48)
         }
     }
 
@@ -212,7 +212,7 @@ class PetOverlayService : Service() {
         if (walking) return
         walking = true
         dir = if (Random.nextBoolean()) -1 else 1
-        walkEndAt = System.currentTimeMillis() + Random.nextLong(2600, 6200)
+        walkEndAt = System.currentTimeMillis() + Random.nextLong(2000, 4200)
         sendJs("setFacing($dir)")
         sendJs("startWalk()")
     }
@@ -221,7 +221,7 @@ class PetOverlayService : Service() {
         if (!walking) return
         walking = false
         sendJs("stopWalk()")
-        nextWalkAt = System.currentTimeMillis() + Random.nextLong(2600, 9000)
+        nextWalkAt = System.currentTimeMillis() + Random.nextLong(7000, 20000)
     }
 
     private val pollTask = object : Runnable {
