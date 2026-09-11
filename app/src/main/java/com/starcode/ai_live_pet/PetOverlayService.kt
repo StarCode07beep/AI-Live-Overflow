@@ -47,6 +47,8 @@ class PetOverlayService : Service() {
     private var screenH = 0
 
     private var dir = -1
+    private var phase = 0
+    private var wallSide = 1
     private var walking = false
     private var walkEndAt = 0L
     private var nextWalkAt = 0L
@@ -107,6 +109,8 @@ class PetOverlayService : Service() {
                     startX = params.x
                     startY = params.y
                     downAt = System.currentTimeMillis()
+                    phase = 0
+                    sendJs("setRotate(0)")
                     dragging = true
                     moved = false
                     holding = false
@@ -193,23 +197,80 @@ class PetOverlayService : Service() {
             try {
                 if (walking && !dragging && web != null) {
                     val speed = (2.5 * resources.displayMetrics.density)
-                    val nx = params.x + (dir * speed).toInt()
-                    if (nx <= minX()) {
-                        params.x = minX()
-                        dir = 1
-                        sendJs("setFacing(1)")
-                        sendJs("onEdge()")
-                    } else if (nx >= maxX()) {
-                        params.x = maxX()
-                        dir = -1
-                        sendJs("setFacing(-1)")
-                        sendJs("onEdge()")
-                    } else {
-                        params.x = nx
+                    val climbSpeed = (3.2 * resources.displayMetrics.density).toInt()
+                    when (phase) {
+                        0 -> {
+                            val nx = params.x + (dir * speed).toInt()
+                            if (nx <= minX()) {
+                                if (Random.nextFloat() < 0.45f) {
+                                    startClimb(-1)
+                                } else {
+                                    params.x = minX()
+                                    dir = 1
+                                    sendJs("setFacing(1)")
+                                    sendJs("onEdge()")
+                                }
+                            } else if (nx >= maxX()) {
+                                if (Random.nextFloat() < 0.45f) {
+                                    startClimb(1)
+                                } else {
+                                    params.x = maxX()
+                                    dir = -1
+                                    sendJs("setFacing(-1)")
+                                    sendJs("onEdge()")
+                                }
+                            } else {
+                                params.x = nx
+                            }
+                        }
+                        1 -> {
+                            val ny = params.y - climbSpeed
+                            if (ny <= 0) {
+                                params.y = 0
+                                phase = 2
+                                dir = if (Random.nextBoolean()) -1 else 1
+                                sendJs("setRotate(180)")
+                                sendJs("setFacing($dir)")
+                            } else {
+                                params.y = ny
+                            }
+                        }
+                        2 -> {
+                            val nx = params.x + (dir * speed).toInt()
+                            if (nx <= minX() || nx >= maxX()) {
+                                if (nx <= minX()) {
+                                    params.x = minX()
+                                    wallSide = -1
+                                } else {
+                                    params.x = maxX()
+                                    wallSide = 1
+                                }
+                                phase = 3
+                                sendJs("setRotate(0)")
+                                sendJs("setFacing($wallSide)")
+                            } else {
+                                params.x = nx
+                            }
+                        }
+                        else -> {
+                            val ny = params.y + climbSpeed
+                            if (ny >= bottomY()) {
+                                params.y = bottomY()
+                                phase = 0
+                                dir = if (wallSide > 0) -1 else 1
+                                sendJs("setRotate(0)")
+                                sendJs("setFacing($dir)")
+                            } else {
+                                params.y = ny
+                            }
+                        }
                     }
                     try {
                         wm.updateViewLayout(web, params)
                     } catch (t: Throwable) {
+                    }
+                    if (phase != 0) {
+                        walkEndAt = System.currentTimeMillis() + 2200
                     }
                     if (System.currentTimeMillis() >= walkEndAt) {
                         stopWalk()
@@ -229,6 +290,25 @@ class PetOverlayService : Service() {
             }
             handler.postDelayed(this, 1200)
         }
+    }
+
+    private fun bottomY(): Int =
+        screenH - viewH + (18 * resources.displayMetrics.density).toInt()
+
+    private fun startClimb(side: Int) {
+        wallSide = side
+        phase = 1
+        walkEndAt = System.currentTimeMillis() + 6000
+        if (side > 0) {
+            params.x = maxX()
+            sendJs("setRotate(-10)")
+            sendJs("setFacing(-1)")
+        } else {
+            params.x = minX()
+            sendJs("setRotate(10)")
+            sendJs("setFacing(1)")
+        }
+        sendJs("onEdge()")
     }
 
     private fun startWalk() {
