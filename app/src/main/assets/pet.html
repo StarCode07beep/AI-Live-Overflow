@@ -65,7 +65,7 @@
     0%,100%{transform:translateY(2px) rotate(0deg) scaleY(.988);}
     50%{transform:translateY(3.2px) rotate(-1.3deg) scaleY(.974);}
   }
-  #petBox.lowbatt #face{filter:saturate(.45) brightness(.86);}
+  #petBox.lowbatt #face{filter:saturate(.9) brightness(.96);}
   #petBox.lowbatt.breath{animation:xj-low 5.6s infinite ease-in-out;}
   #petBox.lowbatt{transform-origin:50% 100%;}
 
@@ -97,7 +97,8 @@
 var IMG = {
   idle: "pet_idle.png", hi: "pet_hi.png", mad: "pet_mad.png",
   sit: "pet_sit.png", sleep: "pet_sleep.png",
-  walkA: "walkA.png", walkB: "walkB.png", hold: "hold.png"
+  walkA: "walkA.png", walkB: "walkB.png", hold: "hold.png",
+  low: "pet_low.png", charge: "pet_charge.png"
 };
 var appLines = {
   "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？"],
@@ -147,9 +148,16 @@ function flash(cls, ms) {
   box.classList.add(cls);
   setTimeout(function () { box.classList.remove(cls); }, ms);
 }
+function poseKey(name) {
+  if (name === "hold" || name === "walkA" || name === "walkB") return name;
+  if (isLow()) return "low";
+  if (powerChg) return "charge";
+  return name;
+}
 function setPose(name) {
-  if (curPose === name) return;
-  curPose = name;
+  var key = poseKey(name);
+  if (curPose === key) return;
+  curPose = key;
   back.onload = function () {
     back.classList.add("show");
     front.classList.remove("show");
@@ -157,7 +165,7 @@ function setPose(name) {
     front = back;
     back = t;
   };
-  back.src = IMG[name];
+  back.src = IMG[key];
 }
 function backToIdle(ms) {
   if (poseTimer) clearTimeout(poseTimer);
@@ -206,6 +214,8 @@ function setPower(pct, chg, hint) {
   box.classList.toggle("charging", powerChg);
   box.classList.toggle("lowbatt", isLow());
   if (isLow() && mode === "walk") stopWalk();
+  curPose = "";
+  if (mode !== "walk") setPose("idle");
   var now = Date.now();
   if (hint === 1 && now - powerSaidAt > 30000) {
     powerSaidAt = now;
