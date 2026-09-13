@@ -13,6 +13,15 @@ import android.widget.Toast
 
 class MainActivity : Activity() {
 
+    private val notiState: TextView by lazy {
+        TextView(this).apply { textSize = 13f }
+    }
+
+    private fun notiEnabled(): Boolean {
+        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: return false
+        return flat.contains(packageName)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -65,6 +74,14 @@ class MainActivity : Activity() {
             Toast.makeText(this, "收回去了", Toast.LENGTH_SHORT).show()
         }
 
+        add("④ 开通知读取权限") {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+        add("刷新通知权限状态") {
+            notiState.text = if (notiEnabled()) "通知读取：已开" else "通知读取：还没开"
+        }
+        wrap.addView(notiState)
+        notiState.text = if (notiEnabled()) "通知读取：已开" else "通知读取：还没开"
         setContentView(ScrollView(this).apply { addView(wrap) })
     }
 }
