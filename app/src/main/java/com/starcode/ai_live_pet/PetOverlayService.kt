@@ -73,7 +73,7 @@ class PetOverlayService : Service() {
         addPet()
         registerPower()
         handler.postDelayed(pollTask, 3000)
-        nextWalkAt = System.currentTimeMillis() + 9000
+        nextWalkAt = System.currentTimeMillis() + Random.nextLong(15000, 30000)
         handler.postDelayed(stepTask, 900)
         handler.postDelayed(decideTask, 1200)
     }
@@ -161,7 +161,7 @@ class PetOverlayService : Service() {
                         }
                     }
                     moved = false
-                    nextWalkAt = System.currentTimeMillis() + 4000
+                    nextWalkAt = System.currentTimeMillis() + Random.nextLong(25000, 50000)
                     true
                 }
                 else -> true
@@ -334,7 +334,7 @@ class PetOverlayService : Service() {
         if (!walking) return
         walking = false
         sendJs("stopWalk()")
-        nextWalkAt = System.currentTimeMillis() + Random.nextLong(7000, 20000)
+        nextWalkAt = System.currentTimeMillis() + Random.nextLong(45000, 110000)
     }
 
     private val pollTask = object : Runnable {
