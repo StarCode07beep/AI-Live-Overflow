@@ -48,6 +48,27 @@
   }
   #petBox.xj-shake{animation:xj-shake .5s ease-in-out;}
 
+  /* 充电：发光 + 尾巴摇快 */
+  @keyframes xj-charge{
+    0%,100%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-3.2px) rotate(1.4deg);}
+  }
+  @keyframes xj-glow{
+    0%,100%{filter:drop-shadow(0 0 4px rgba(255,226,140,.9)) drop-shadow(0 0 9px rgba(255,196,64,.5));}
+    50%{filter:drop-shadow(0 0 7px rgba(255,234,160,1)) drop-shadow(0 0 16px rgba(255,190,52,.75));}
+  }
+  #petBox.charging #face{animation:xj-glow 1.05s infinite ease-in-out;}
+  #petBox.charging.breath{animation:xj-charge 1.05s infinite ease-in-out;}
+
+  /* 低电：蔫、变慢、颜色掉一点 */
+  @keyframes xj-low{
+    0%,100%{transform:translateY(2px) rotate(0deg) scaleY(.988);}
+    50%{transform:translateY(3.2px) rotate(-1.3deg) scaleY(.974);}
+  }
+  #petBox.lowbatt #face{filter:saturate(.45) brightness(.86);}
+  #petBox.lowbatt.breath{animation:xj-low 5.6s infinite ease-in-out;}
+  #petBox.lowbatt{transform-origin:50% 100%;}
+
   #bubbleWrap{position:absolute;right:56%;top:44%;transform:translateY(-50%);width:44%;display:flex;justify-content:flex-end;pointer-events:none;}
   #bubble{position:relative;max-width:100%;box-sizing:border-box;padding:5px 9px;border-radius:11px;background:rgba(255,255,255,.95);color:#3a3330;font:10.5px/1.3 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:normal;word-break:break-word;}
   #bubble.on{opacity:1;}
@@ -56,6 +77,8 @@
   #bubble.pink::after{border-left-color:rgba(255,216,226,.96);}
   #bubble.rage{background:rgba(255,206,206,.96);color:#9d1f1f;}
   #bubble.rage::after{border-left-color:rgba(255,206,206,.96);}
+  #bubble.warm{background:rgba(255,240,200,.96);color:#8a5a12;}
+  #bubble.warm::after{border-left-color:rgba(255,240,200,.96);}
 </style>
 </head>
 <body>
@@ -93,6 +116,8 @@ var walkLines = ["溜达一圈", "看看你在干嘛", "让让", "过来看看"]
 var edgeLines = ["到头了", "没路了", "这堵墙挺好看", "回走"];
 var nightLines = ["几点了", "你还不睡", "眼睛闭上", "陪你熬"];
 var sleepLines = ["……呼", "别吵", "困", "我就眯一会儿"];
+var lowLines = ["快没电了", "我也撑不住了", "省着点用", "剩这点，够干嘛"];
+var chargeLines = ["来电了", "充上了", "有电了，精神", "满了满了"];
 
 var bubble = document.getElementById("bubble");
 var box = document.getElementById("petBox");
@@ -106,6 +131,9 @@ var mode = "stand";
 var stepIdx = 0;
 var tapCount = 0, tapTimer = null;
 var lastAct = Date.now();
+var powerPct = -1, powerChg = false, powerSaidAt = 0;
+
+function isLow() { return !powerChg && powerPct >= 0 && powerPct <= 20; }
 
 function say(text, style, ms) {
   bubble.className = "on" + (style ? " " + style : "");
@@ -152,6 +180,7 @@ function setRotate(d) {
 }
 function startWalk() {
   if (mode === "walk") return;
+  if (isLow()) return;
   mode = "walk";
   if (poseTimer) clearTimeout(poseTimer);
   if (walkTimer) { clearInterval(walkTimer); walkTimer = null; }
@@ -171,11 +200,29 @@ function isNight() {
   var h = new Date().getHours();
   return h >= 23 || h < 6;
 }
+function setPower(pct, chg, hint) {
+  powerPct = pct;
+  powerChg = !!chg;
+  box.classList.toggle("charging", powerChg);
+  box.classList.toggle("lowbatt", isLow());
+  if (isLow() && mode === "walk") stopWalk();
+  var now = Date.now();
+  if (hint === 1 && now - powerSaidAt > 30000) {
+    powerSaidAt = now;
+    setPose("hi");
+    say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2600);
+    flash("xj-hop", 620);
+    backToIdle(2200);
+  } else if (hint === 2 && now - powerSaidAt > 30000) {
+    powerSaidAt = now;
+    say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 3400);
+  }
+}
 function onLongPress() {
   lastAct = Date.now();
   if (mode === "walk") stopWalk();
   setPose("hi");
-  say("你按着我干嘛", "pink", 2400);
+  say(powerChg ? "充着电呢，别拎我" : "你按着我干嘛", "pink", 2400);
   flash("xj-hop", 620);
   backToIdle(2000);
 }
@@ -221,7 +268,11 @@ function onTap() {
     return;
   }
   setPose("hi");
-  say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
+  if (isLow() && Math.random() < 0.5) {
+    say("冷落我就可以，别冷落电", "", 2200);
+  } else {
+    say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
+  }
   flash("xj-hop", 620);
   backToIdle(1700);
 }
@@ -254,7 +305,11 @@ function switchApp(pkg) {
       if (curPose === "sleep") {
         say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
       } else if (bubble.className.indexOf("on") < 0) {
-        if (isNight()) {
+        if (isLow()) {
+          say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 2800);
+        } else if (powerChg) {
+          say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2400);
+        } else if (isNight()) {
           say(nightLines[Math.floor(Math.random() * nightLines.length)], "pink", 2600);
         } else {
           say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
@@ -266,7 +321,7 @@ function switchApp(pkg) {
 })();
 setInterval(function () {
   if (mode !== "walk" && Date.now() - lastAct > 90000 && curPose === "idle") {
-    setPose("sleep");
+    setPose(isLow() ? "sit" : "sleep");
   }
 }, 8000);
 setTimeout(function () {
