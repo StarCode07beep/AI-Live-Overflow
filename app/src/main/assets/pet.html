@@ -48,17 +48,7 @@
   }
   #petBox.xj-shake{animation:xj-shake .5s ease-in-out;}
 
-  /* 充电：发光 + 尾巴摇快 */
-  @keyframes xj-charge{
-    0%,100%{transform:translateY(0) rotate(0deg);}
-    50%{transform:translateY(-3.2px) rotate(1.4deg);}
-  }
-  @keyframes xj-glow{
-    0%,100%{filter:drop-shadow(0 0 4px rgba(255,226,140,.9)) drop-shadow(0 0 9px rgba(255,196,64,.5));}
-    50%{filter:drop-shadow(0 0 7px rgba(255,234,160,1)) drop-shadow(0 0 16px rgba(255,190,52,.75));}
-  }
-  #petBox.charging #face{animation:xj-glow 1.05s infinite ease-in-out;}
-  #petBox.charging.breath{animation:xj-charge 1.05s infinite ease-in-out;}
+  /* 充电：不加发光特效，只换表情图 */
 
   /* 低电：蔫、变慢、颜色掉一点 */
   @keyframes xj-low{
@@ -96,7 +86,7 @@
 <script>
 var IMG = {
   idle: "pet_idle.png", hi: "pet_hi.png", mad: "pet_mad.png",
-  sit: "pet_sit.png", sleep: "pet_sleep.png",
+  jealous: "pet_jealous.png", sit: "pet_sit.png", sleep: "pet_sleep.png",
   walkA: "walkA.png", walkB: "walkB.png", hold: "hold.png",
   low: "pet_low.png", charge: "pet_charge.png"
 };
@@ -148,16 +138,9 @@ function flash(cls, ms) {
   box.classList.add(cls);
   setTimeout(function () { box.classList.remove(cls); }, ms);
 }
-function poseKey(name) {
-  if (name === "hold" || name === "walkA" || name === "walkB") return name;
-  if (isLow()) return "low";
-  if (powerChg) return "charge";
-  return name;
-}
 function setPose(name) {
-  var key = poseKey(name);
-  if (curPose === key) return;
-  curPose = key;
+  if (curPose === name) return;
+  curPose = name;
   back.onload = function () {
     back.classList.add("show");
     front.classList.remove("show");
@@ -165,7 +148,7 @@ function setPose(name) {
     front = back;
     back = t;
   };
-  back.src = IMG[key];
+  back.src = IMG[name];
 }
 function backToIdle(ms) {
   if (poseTimer) clearTimeout(poseTimer);
@@ -219,13 +202,15 @@ function setPower(pct, chg, hint) {
   var now = Date.now();
   if (hint === 1 && now - powerSaidAt > 30000) {
     powerSaidAt = now;
-    setPose("hi");
+    setPose("charge");
     say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2600);
     flash("xj-hop", 620);
     backToIdle(2200);
   } else if (hint === 2 && now - powerSaidAt > 30000) {
     powerSaidAt = now;
+    setPose("low");
     say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 3400);
+    backToIdle(3200);
   }
 }
 function onLongPress() {
@@ -298,7 +283,7 @@ function switchApp(pkg) {
     say("你在用什么，没见过", "", 2200);
   }
   if (hot) {
-    setPose("mad");
+    setPose("jealous");
     flash("xj-shake", 520);
     backToIdle(3400);
   } else if (calmApps.indexOf(pkg) >= 0) {
