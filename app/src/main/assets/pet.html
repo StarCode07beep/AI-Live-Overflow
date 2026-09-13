@@ -91,16 +91,74 @@ var IMG = {
   low: "pet_low.png", charge: "pet_charge.png"
 };
 var appLines = {
-  "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？"],
-  "com.tencent.mm": ["跟谁聊呢", "谁给你发的", "置顶是我吗"],
-  "com.xingin.xhs": ["又看别人", "有我好看吗", "刷够了没"],
+  "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？", "再看我就生气"],
+  "com.ss.android.ugc.aweme.lite": ["连极速版都用上了", "这么想看", "抬头看我一眼"],
+  "com.smile.gifmaker": ["又刷上了", "看别人不如看我", "这有什么好看的"],
+  "com.kuaishou.nebula": ["这么快的手", "眼睛跟得上吗", "别刷了"],
+  "com.tencent.mm": ["跟谁聊呢", "谁给你发的", "置顶是我吗", "打字这么快，不是我吧", "聊什么呢，给我看看"],
+  "com.tencent.mobileqq": ["QQ响了", "谁找你", "群里聊什么呢", "头像这么好看？"],
+  "com.xingin.xhs": ["又看别人", "有我好看吗", "刷够了没", "收藏夹里都是谁"],
   "tv.danmaku.bili": ["又在看番", "带我一起", "看完歇会儿"],
   "com.taobao.taobao": ["又买？", "钱包看一眼", "买前说一声"],
+  "com.taobao.idlefish": ["又逛二手", "买回来谁给你搬"],
+  "com.jingdong.app.mall": ["又买？", "购物车我看了", "自营也别乱点"],
+  "com.sankuai.meituan": ["点什么呢", "给我也来一份"],
+  "com.dianping.v1": ["找吃的？", "带上我"],
   "com.tencent.tmgp.sgame": ["打完这局就停", "又开一把？", "输了别找我"],
+  "com.tencent.ig": ["又跳伞", "落地成盒了叫我"],
+  "com.tencent.lolm": ["又开一局", "手别抖"],
+  "com.miHoYo.Yuanshen": ["又去提瓦特", "抽卡前说一声", "回家看看我"],
+  "com.netease.cloudmusic": ["听什么呢", "分我一只耳"],
+  "com.tencent.qqmusic": ["循环几遍了", "耳机分我"],
+  "com.kugou.android": ["这歌老", "换一首"],
+  "com.ximalaya.ting.android": ["在听故事？", "声音比我好听？"],
+  "com.zhihu.android": ["看得真认真", "编的吧", "你信这个？"],
+  "com.sina.weibo": ["刷热搜呢", "今天谁又塌了"],
+  "com.ss.android.article.news": ["又看新闻", "标题党别信"],
+  "com.autonavi.minimap": ["出门了？", "早点回"],
+  "com.baidu.BaiduMap": ["去哪儿", "带上我"],
+  "com.sdu.didi.psnger": ["打车去哪", "别乱跑"],
+  "com.MobileTicket": ["买票？", "去哪，几点回"],
+  "com.eg.android.AlipayGphone": ["看余额呢", "钱有我好看？"],
   "com.chaoxing.mobile": ["好好学习", "我坐这儿陪你", "不急，慢慢来"],
-  "com.android.camera": ["拍谁呢", "给我看一眼"]
+  "com.tencent.wework": ["还在加班", "活儿接不完？"],
+  "com.alibaba.android.rimet": ["钉钉又响", "下班别提工作"],
+  "com.tencent.qqlive": ["看剧不叫我", "片头别跳"],
+  "com.hunantv.imgo.activity": ["又看综艺", "笑点分享一下"],
+  "com.youku.phone": ["看什么呢", "一起看"],
+  "com.tencent.mtt": ["查什么呢", "这个我知道"],
+  "com.UCMobile": ["又搜什么", "搜我名字干嘛"],
+  "com.android.camera": ["拍谁呢", "给我看一眼"],
+  "com.android.gallery3d": ["翻什么照片", "有我吗"],
+  "com.android.settings": ["改设置呢", "别把我关了"]
 };
-var calmApps = ["com.chaoxing.mobile", "com.tencent.mm"];
+var hotApps = ["com.tencent.mm", "com.tencent.mobileqq", "com.xingin.xhs",
+  "com.ss.android.ugc.aweme", "com.ss.android.ugc.aweme.lite", "com.smile.gifmaker",
+  "com.kuaishou.nebula", "com.sina.weibo", "com.taobao.idlefish",
+  "com.tencent.tmgp.sgame", "com.tencent.ig", "com.tencent.lolm"];
+var calmApps = ["com.chaoxing.mobile"];
+var unknownLines = ["你在用什么，没见过", "这是哪个app", "换个我认识的", "盯着这个看干嘛"];
+var notiLines = {
+  "com.tencent.mm": ["微信响了", "谁给你发消息", "先看我，再看消息"],
+  "com.tencent.mobileqq": ["QQ有人找你", "回消息前先看我"],
+  "com.tencent.wework": ["工作消息", "下班了别理"],
+  "com.alibaba.android.rimet": ["钉钉响了", "又是工作"],
+  "com.android.mms": ["短信？还是验证码", "谁给你发短信"],
+  "com.google.android.apps.messaging": ["短信来了", "看看是谁"],
+  "org.telegram.messenger": ["Telegram响了", "谁啊"]
+};
+function onNoti(pkg, who) {
+  lastAct = Date.now();
+  if (mode === "walk") return;
+  if (curPose === "sleep") setPose("idle");
+  var pool = notiLines[pkg] || ["有消息来了"];
+  var line = pool[Math.floor(Math.random() * pool.length)];
+  if (who && who.length > 0 && who.length <= 10) line = who + "。谁？";
+  say(line, "rage", 3600);
+  setPose("jealous");
+  flash("xj-shake", 520);
+  backToIdle(3600);
+}
 var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我", "疼"];
 var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
 var walkLines = ["溜达一圈", "看看你在干嘛", "让让", "过来看看"];
@@ -276,12 +334,12 @@ function switchApp(pkg) {
   lastAct = Date.now();
   if (mode === "walk") return;
   var lines = appLines[pkg];
-  var hot = (pkg === "com.tencent.mm" || pkg === "com.tencent.tmgp.sgame" || pkg === "com.xingin.xhs");
+  var hot = hotApps.indexOf(pkg) >= 0;
   if (curPose === "sleep") setPose("idle");
   if (lines) {
     say(lines[Math.floor(Math.random() * lines.length)], hot ? "rage" : "pink", 3200);
   } else {
-    say("你在用什么，没见过", "", 2200);
+    say(unknownLines[Math.floor(Math.random() * unknownLines.length)], "", 2200);
   }
   if (hot) {
     setPose("jealous");
