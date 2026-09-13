@@ -85,7 +85,7 @@
 </div>
 <script>
 var IMG = {
-  idle: "pet_idle.png", hi: "pet_hi.png", mad: "pet_mad.png",
+  idle: "pet_idle.png", hi: "pet_hi.png", hi2: "pet_hi2.png", mad: "pet_mad.png",
   jealous: "pet_jealous.png", sit: "pet_sit.png", sleep: "pet_sleep.png",
   walkA: "walkA.png", walkB: "walkB.png", hold: "hold.png",
   low: "pet_low.png", charge: "pet_charge.png"
@@ -139,6 +139,7 @@ function flash(cls, ms) {
   setTimeout(function () { box.classList.remove(cls); }, ms);
 }
 function setPose(name) {
+  if (name === "hi") name = Math.random() < 0.5 ? "hi" : "hi2";
   if (curPose === name) return;
   curPose = name;
   back.onload = function () {
