@@ -7,9 +7,12 @@ import android.app.PendingIntent
 import android.app.Service
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -53,6 +56,10 @@ class PetOverlayService : Service() {
     private var walkEndAt = 0L
     private var nextWalkAt = 0L
 
+    private var battLevel = -1
+    private var battCharging = false
+    private var lowSaidAt = 0L
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
@@ -63,6 +70,7 @@ class PetOverlayService : Service() {
         screenW = dm.widthPixels
         screenH = dm.heightPixels
         addPet()
+        registerPower()
         handler.postDelayed(pollTask, 3000)
         nextWalkAt = System.currentTimeMillis() + 9000
         handler.postDelayed(stepTask, 900)
@@ -313,6 +321,7 @@ class PetOverlayService : Service() {
 
     private fun startWalk() {
         if (walking) return
+        if (battLevel in 0..20 && !battCharging) return
         walking = true
         dir = if (Random.nextBoolean()) -1 else 1
         walkEndAt = System.currentTimeMillis() + Random.nextLong(2000, 4200)
@@ -352,6 +361,54 @@ class PetOverlayService : Service() {
         return best?.packageName ?: ""
     }
 
+    private fun registerPower() {
+        val f = IntentFilter().apply {
+            addAction(Intent.ACTION_BATTERY_CHANGED)
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+        }
+        try {
+            registerReceiver(powerReceiver, f)
+        } catch (t: Throwable) {
+        }
+    }
+
+    private val powerReceiver = object : BroadcastReceiver() {
+        override fun onReceive(c: Context?, intent: Intent?) {
+            val i = intent ?: return
+            when (i.action) {
+                Intent.ACTION_BATTERY_CHANGED -> {
+                    val lv = i.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+                    val sc = i.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+                    val pct = if (lv >= 0 && sc > 0) lv * 100 / sc else -1
+                    val st = i.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
+                    val chg = st == BatteryManager.BATTERY_STATUS_CHARGING ||
+                        st == BatteryManager.BATTERY_STATUS_FULL
+                    applyPower(pct, chg)
+                }
+                Intent.ACTION_POWER_CONNECTED -> applyPower(battLevel, true)
+                Intent.ACTION_POWER_DISCONNECTED -> applyPower(battLevel, false)
+            }
+        }
+    }
+
+    private fun applyPower(pct: Int, chg: Boolean) {
+        if (pct == battLevel && chg == battCharging) return
+        val justCharged = chg && !battCharging
+        val wasLow = battLevel in 0..20 && !battCharging
+        val justLow = !chg && pct in 0..20 && !wasLow &&
+            System.currentTimeMillis() - lowSaidAt > 120000
+        battLevel = pct
+        battCharging = chg
+        val hint = when {
+            justCharged -> 1
+            justLow -> 2
+            else -> 0
+        }
+        if (justLow) lowSaidAt = System.currentTimeMillis()
+        sendJs("setPower($pct,$chg,$hint)")
+    }
+
     private fun buildNotification(): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(CHANNEL_ID, "桌宠", NotificationManager.IMPORTANCE_MIN)
@@ -376,6 +433,10 @@ class PetOverlayService : Service() {
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
+        try {
+            unregisterReceiver(powerReceiver)
+        } catch (t: Throwable) {
+        }
         web?.let {
             try {
                 wm.removeView(it)
