@@ -64,6 +64,7 @@ class PetOverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        inst = this
         startForeground(NOTI_ID, buildNotification())
         wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val dm = resources.displayMetrics
@@ -409,6 +410,11 @@ class PetOverlayService : Service() {
         sendJs("setPower($pct,$chg,$hint)")
     }
 
+    fun onNotiFromApp(pkg: String, who: String) {
+        val clean = who.replace("\\", "").replace("'", "").replace("\n", " ").trim().take(12)
+        handler.post { sendJs("onNoti('" + pkg + "','" + clean + "')") }
+    }
+
     private fun buildNotification(): Notification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(CHANNEL_ID, "桌宠", NotificationManager.IMPORTANCE_MIN)
@@ -432,6 +438,7 @@ class PetOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        inst = null
         handler.removeCallbacksAndMessages(null)
         try {
             unregisterReceiver(powerReceiver)
@@ -448,7 +455,13 @@ class PetOverlayService : Service() {
     }
 
     companion object {
+        @Volatile
+        private var inst: PetOverlayService? = null
         private const val CHANNEL_ID = "pet_overlay"
         private const val NOTI_ID = 1024
+
+        fun notifyFromApp(pkg: String, who: String) {
+            inst?.onNotiFromApp(pkg, who)
+        }
     }
 }
