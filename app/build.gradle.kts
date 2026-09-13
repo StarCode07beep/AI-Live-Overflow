@@ -8,16 +8,30 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.starcode.ai_live_pet"
+        applicationId = "com.starcode.xujin_deskpet"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0-power"
+    }
+
+    signingConfigs {
+        create("fixed") {
+            storeFile = rootProject.file("signing/xujin.p12")
+            storePassword = "xujin0921"
+            keyAlias = "xujin"
+            keyPassword = "xujin0921"
+            storeType = "PKCS12"
+        }
     }
 
     buildTypes {
-        release {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("fixed")
+        }
+        getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("fixed")
         }
     }
 
