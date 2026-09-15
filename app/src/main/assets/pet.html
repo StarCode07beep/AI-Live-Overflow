@@ -73,25 +73,37 @@
   #bubble.rage::after{border-left-color:rgba(255,206,206,.96);}
   #bubble.warm{background:rgba(255,240,200,.96);color:#8a5a12;}
   #bubble.warm::after{border-left-color:rgba(255,240,200,.96);}
+
+  #blinkLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:0;transition:opacity .18s;}
+  #blinkLayer.on{opacity:1;}
+  #blinkLayer img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
+  #blinkLayer.on #bka{animation:xj-bk-a 4.8s infinite -3.0s;}
+  #blinkLayer.on #bkb{animation:xj-bk-b 4.8s infinite -3.0s;}
+  @keyframes xj-bk-a{0%,84%{opacity:0;}85%,90%{opacity:1;}92%,100%{opacity:0;}}
+  @keyframes xj-bk-b{0%,87%{opacity:0;}88%,90%{opacity:1;}91%,100%{opacity:0;}}
 </style>
 </head>
 <body>
 <div id="stage">
   <div id="petBox" class="breath">
     <div id="face">
-      <img id="pA" class="pose show" src="pet_idle.png" alt="">
-      <img id="pB" class="pose" src="pet_idle.png" alt="">
+      <img id="pA" class="pose show" src="newopen.png" alt="">
+      <img id="pB" class="pose" src="newopen.png" alt="">
       <img id="wA" class="wpose" src="walkA.png" alt="">
       <img id="wB" class="wpose" src="walkB.png" alt="">
       <img id="wC" class="wpose" src="walkC.png" alt="">
       <img id="wD" class="wpose" src="walkD.png" alt="">
+    </div>
+    <div id="blinkLayer">
+      <img id="bka" src="newhalf.png" alt="">
+      <img id="bkb" src="newclosed.png" alt="">
     </div>
   </div>
   <div id="bubbleWrap"><div id="bubble"></div></div>
 </div>
 <script>
 var IMG = {
-  idle: "pet_idle.png", hi: "pet_hi.png", hi2: "pet_hi2.png", mad: "pet_mad.png",
+  idle: "newopen.png", hi: "pet_hi.png", hi2: "pet_hi2.png", mad: "pet_mad.png",
   jealous: "pet_jealous.png", sit: "pet_sit.png", sleep: "pet_sleep.png",
   walkA: "walkA.png", walkB: "walkB.png", walkC: "walkC.png", walkD: "walkD.png", hold: "hold.png",
   low: "pet_low.png", charge: "pet_charge.png"
@@ -389,6 +401,14 @@ setTimeout(function () {
   say("来了", "pink", 1800);
   backToIdle(2000);
 }, 2500);
+
+var blinkLayer = document.getElementById("blinkLayer");
+function updateBlink() {
+  var on = (mode !== "walk") && curPose === "idle" &&
+    !box.classList.contains("held") && !box.classList.contains("stepping");
+  blinkLayer.classList.toggle("on", on);
+}
+setInterval(updateBlink, 300);
 </script>
 </body>
 </html>
