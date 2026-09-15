@@ -13,10 +13,7 @@
   .pose.show{opacity:1;}
   .wpose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
   #petBox.stepping .pose{opacity:0;transition:none;}
-  #petBox.stepping #wA{animation:xj-wa 1.32s infinite;}
-  #petBox.stepping #wB{animation:xj-wb 1.32s infinite;}
-  #petBox.stepping #wC{animation:xj-wc 1.32s infinite;}
-  #petBox.stepping #wD{animation:xj-wd 1.32s infinite;}
+  #petBox.stepping #wA{opacity:1;}
   @keyframes xj-wa{0%,16.6%{opacity:1;}16.7%,100%{opacity:0;}}
   @keyframes xj-wb{0%,16.6%{opacity:0;}16.7%,33.2%{opacity:1;}33.3%,83.2%{opacity:0;}83.3%,100%{opacity:1;}}
   @keyframes xj-wc{0%,33.2%{opacity:0;}33.3%,49.9%{opacity:1;}50%,66.6%{opacity:0;}66.7%,83.2%{opacity:1;}83.3%,100%{opacity:0;}}
@@ -77,8 +74,6 @@
   #blinkLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:0;transition:opacity .18s;}
   #blinkLayer.on{opacity:1;}
   #blinkLayer img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
-  #blinkLayer.on #bka{animation:xj-bk-a 4.8s infinite -3.0s;}
-  #blinkLayer.on #bkb{animation:xj-bk-b 4.8s infinite -3.0s;}
   @keyframes xj-bk-a{0%,84%{opacity:0;}85%,90%{opacity:1;}92%,100%{opacity:0;}}
   @keyframes xj-bk-b{0%,87%{opacity:0;}88%,90%{opacity:1;}91%,100%{opacity:0;}}
   #napLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;opacity:0;transition:opacity .2s;}
@@ -86,11 +81,7 @@
   #face{transition:opacity .2s;}
   #petBox.napping #face{opacity:0;}
   #napLayer img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
-  #napLayer.on #nA{animation:xj-nap-a 3.8s infinite;}
-  #napLayer.on #nB{animation:xj-nap-b 3.8s infinite;}
-  #napLayer.on #nC{animation:xj-nap-c 3.8s infinite;}
-  #napLayer.on #nD{animation:xj-nap-d 3.8s infinite;}
-  #napLayer.on #nE{animation:xj-nap-e 3.8s infinite;}
+  #napLayer.on #nA{opacity:1;}
   @keyframes xj-nap-a{0%,19.5%{opacity:1;}20%,100%{opacity:0;}}
   @keyframes xj-nap-b{0%,19.5%{opacity:0;}20%,39.5%{opacity:1;}40%,100%{opacity:0;}}
   @keyframes xj-nap-c{0%,39.5%{opacity:0;}40%,59.5%{opacity:1;}60%,100%{opacity:0;}}
@@ -426,9 +417,7 @@ setTimeout(function () {
 
 var blinkLayer = document.getElementById("blinkLayer");
 function updateBlink() {
-  var on = (mode !== "walk") && curPose === "idle" &&
-    !box.classList.contains("held") && !box.classList.contains("stepping");
-  blinkLayer.classList.toggle("on", on);
+  blinkLayer.classList.remove("on");
 }
 setInterval(updateBlink, 300);
 
