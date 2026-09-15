@@ -12,7 +12,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.2-walk"
+        versionName = "1.3-walk4"
     }
 
     signingConfigs {
