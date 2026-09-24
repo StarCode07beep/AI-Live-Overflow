@@ -76,6 +76,7 @@ class PetOverlayService : Service() {
         nextWalkAt = System.currentTimeMillis() + Random.nextLong(15000, 30000)
         handler.postDelayed(stepTask, 900)
         handler.postDelayed(decideTask, 1200)
+        handler.postDelayed({ pushBubble() }, 2600)
     }
 
     private fun addPet() {
@@ -141,6 +142,7 @@ class PetOverlayService : Service() {
                             wm.updateViewLayout(touched, params)
                         } catch (t: Throwable) {
                         }
+                        pushBubble()
                     }
                     true
                 }
@@ -162,6 +164,7 @@ class PetOverlayService : Service() {
                     }
                     moved = false
                     nextWalkAt = System.currentTimeMillis() + Random.nextLong(25000, 50000)
+                    pushBubble()
                     true
                 }
                 else -> true
@@ -183,12 +186,25 @@ class PetOverlayService : Service() {
     }
 
     private fun clampY(v: Int): Int {
-        val minY = 0
+        // 上面留出空间：允许继续往上，宠物头顶能贴到屏幕上沿
+        val minY = -(viewH * 0.42).toInt()
         val maxY = screenH - (viewH * 0.45).toInt()
         return when {
             v < minY -> minY
             v > maxY -> maxY
             else -> v
+        }
+    }
+
+    /* 窗口越往上，气泡跟着往下让一点，免得被屏幕上沿裁掉 */
+    private fun pushBubble() {
+        try {
+            val dm = resources.displayMetrics
+            val petTop = params.y + (viewH * 0.42).toInt()
+            val need = (45 * dm.density).toInt() - petTop
+            val drop = if (need > 0) (need / dm.density).toInt() else 0
+            sendJs("setBubbleDrop($drop)")
+        } catch (t: Throwable) {
         }
     }
 
