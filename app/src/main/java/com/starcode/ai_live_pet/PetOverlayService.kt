@@ -80,8 +80,8 @@ class PetOverlayService : Service() {
 
     private fun addPet() {
         val dm = resources.displayMetrics
-        val w = (180 * dm.density).toInt()
-        val h = (118 * dm.density).toInt()
+        val w = (124 * dm.density).toInt()
+        val h = (92 * dm.density).toInt()
         viewW = w
         viewH = h
 
@@ -294,9 +294,7 @@ class PetOverlayService : Service() {
     private val decideTask = object : Runnable {
         override fun run() {
             val now = System.currentTimeMillis()
-            if (!dragging && !walking && now >= nextWalkAt) {
-                startWalk()
-            }
+            // 不走动了：只保留坐着/趴睡两种样子
             handler.postDelayed(this, 1200)
         }
     }
@@ -321,13 +319,7 @@ class PetOverlayService : Service() {
     }
 
     private fun startWalk() {
-        if (walking) return
-        if (battLevel in 0..20 && !battCharging) return
-        walking = true
-        dir = if (Random.nextBoolean()) -1 else 1
-        walkEndAt = System.currentTimeMillis() + Random.nextLong(2000, 4200)
-        sendJs("setFacing($dir)")
-        sendJs("startWalk()")
+        // 只保留坐/睡两种样子，不再走动
     }
 
     private fun stopWalk() {
