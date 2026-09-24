@@ -130,6 +130,12 @@ var powerPct = -1, powerChg = false, powerSaidAt = 0;
 
 function isLow() { return !powerChg && powerPct >= 0 && powerPct <= 20; }
 
+function setBubbleDrop(dp) {
+  var wrap = document.getElementById("bubbleWrap");
+  if (!wrap) return;
+  var d = Number(dp) || 0;
+  wrap.style.bottom = "calc(58% + 4px - " + d + "px)";
+}
 function say(text, style, ms) {
   bubble.className = "on" + (style ? " " + style : "");
   bubble.textContent = text;
