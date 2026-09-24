@@ -7,61 +7,34 @@
   html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden;}
   #stage{position:relative;width:100%;height:100%;}
 
-  #petBox{position:absolute;right:0;bottom:0;width:56%;height:100%;transform-origin:50% 100%;}
-  #face{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:50% 100%;}
-  .pose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;transition:opacity .16s;transform-origin:50% 100%;}
-  .pose.show{opacity:1;}
-  .wpose{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
-  #petBox.stepping .pose{opacity:0;transition:none;}
-  #petBox.stepping #wA{opacity:1;}
-  @keyframes xj-wa{0%,16.6%{opacity:1;}16.7%,100%{opacity:0;}}
-  @keyframes xj-wb{0%,16.6%{opacity:0;}16.7%,33.2%{opacity:1;}33.3%,83.2%{opacity:0;}83.3%,100%{opacity:1;}}
-  @keyframes xj-wc{0%,33.2%{opacity:0;}33.3%,49.9%{opacity:1;}50%,66.6%{opacity:0;}66.7%,83.2%{opacity:1;}83.3%,100%{opacity:0;}}
-  @keyframes xj-wd{0%,49.9%{opacity:0;}50%,66.6%{opacity:1;}66.7%,100%{opacity:0;}}
-  #petBox.held{animation:xj-held 1.7s infinite ease-in-out;transform-origin:50% 22%;}
-  @keyframes xj-held{0%,100%{transform:rotate(-4deg) translateY(-3px);}50%{transform:rotate(4deg) translateY(-3px);}}
+  /* 只留两副样子：坐着、趴着睡。不走动，没有别的姿势 */
+  #petBox{position:absolute;right:0;bottom:0;width:70%;height:100%;transform-origin:50% 100%;}
+  #petBox img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;transition:opacity .26s;transform-origin:50% 100%;}
+  #petBox img.on{opacity:1;}
 
-  #petBox.breath{animation:xj-idle 3.4s infinite ease-in-out;}
-  @keyframes xj-idle{
+  /* 坐着：只有极轻的呼吸起伏，不换帧、不位移 */
+  #petBox.breath{animation:xj-breath 4s infinite ease-in-out;}
+  @keyframes xj-breath{
     0%,100%{transform:translateY(0) rotate(0deg);}
-    25%{transform:translateY(-2.4px) rotate(-.8deg);}
-    75%{transform:translateY(-1.2px) rotate(.8deg);}
+    50%{transform:translateY(-1.3px) rotate(-.5deg);}
   }
-  #petBox.stepping{animation:xj-step .44s infinite ease-in-out;}
-  @keyframes xj-step{
-    0%,100%{transform:translateY(0) scaleY(1);}
-    42%{transform:translateY(-2.6px) scaleY(1.012);}
-  }
+  #petBox.xj-hop{animation:xj-hop .5s ease-out;}
   @keyframes xj-hop{
     0%{transform:translateY(0) scale(1);}
-    35%{transform:translateY(-5%) scale(1.03);}
+    35%{transform:translateY(-4%) scale(1.02);}
     70%{transform:translateY(0) scale(1);}
-    85%{transform:translateY(-1.5%) scale(1.01);}
     100%{transform:translateY(0) scale(1);}
   }
-  #petBox.xj-hop{animation:xj-hop .58s ease-out;}
+  #petBox.xj-shake{animation:xj-shake .48s ease-in-out;}
   @keyframes xj-shake{
     0%,100%{transform:translateX(0) rotate(0);}
-    20%{transform:translateX(-2px) rotate(-2.2deg);}
-    40%{transform:translateX(2px) rotate(2.2deg);}
-    60%{transform:translateX(-1.4px) rotate(-1.4deg);}
-    80%{transform:translateX(1.4px) rotate(1.4deg);}
+    25%{transform:translateX(-2px) rotate(-2deg);}
+    50%{transform:translateX(2px) rotate(2deg);}
+    75%{transform:translateX(-1.2px) rotate(-1.2deg);}
   }
-  #petBox.xj-shake{animation:xj-shake .5s ease-in-out;}
 
-  /* 充电：不加发光特效，只换表情图 */
-
-  /* 低电：蔫、变慢、颜色掉一点 */
-  @keyframes xj-low{
-    0%,100%{transform:translateY(2px) rotate(0deg) scaleY(.988);}
-    50%{transform:translateY(3.2px) rotate(-1.3deg) scaleY(.974);}
-  }
-  #petBox.lowbatt #face{filter:saturate(.9) brightness(.96);}
-  #petBox.lowbatt.breath{animation:xj-low 5.6s infinite ease-in-out;}
-  #petBox.lowbatt{transform-origin:50% 100%;}
-
-  #bubbleWrap{position:absolute;right:56%;top:44%;transform:translateY(-50%);width:44%;display:flex;justify-content:flex-end;pointer-events:none;}
-  #bubble{position:relative;max-width:100%;box-sizing:border-box;padding:5px 9px;border-radius:11px;background:rgba(255,255,255,.95);color:#3a3330;font:10.5px/1.3 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:normal;word-break:break-word;}
+  #bubbleWrap{position:absolute;right:70%;top:42%;transform:translateY(-50%);width:44%;display:flex;justify-content:flex-end;pointer-events:none;}
+  #bubble{position:relative;max-width:100%;box-sizing:border-box;padding:4px 8px;border-radius:10px;background:rgba(255,255,255,.95);color:#3a3330;font:10px/1.3 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:normal;word-break:break-word;}
   #bubble.on{opacity:1;}
   #bubble::after{content:"";position:absolute;right:-4px;top:50%;margin-top:-4px;border:4px solid transparent;border-left-color:rgba(255,255,255,.95);}
   #bubble.pink{background:rgba(255,216,226,.96);color:#a62a52;}
@@ -70,57 +43,17 @@
   #bubble.rage::after{border-left-color:rgba(255,206,206,.96);}
   #bubble.warm{background:rgba(255,240,200,.96);color:#8a5a12;}
   #bubble.warm::after{border-left-color:rgba(255,240,200,.96);}
-
-  #blinkLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3;opacity:0;transition:opacity .18s;}
-  #blinkLayer.on{opacity:1;}
-  #blinkLayer img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
-  @keyframes xj-bk-a{0%,84%{opacity:0;}85%,90%{opacity:1;}92%,100%{opacity:0;}}
-  @keyframes xj-bk-b{0%,87%{opacity:0;}88%,90%{opacity:1;}91%,100%{opacity:0;}}
-  #napLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:4;opacity:0;transition:opacity .2s;}
-  #napLayer.on{opacity:1;}
-  #face{transition:opacity .2s;}
-  #petBox.napping #face{opacity:0;}
-  #napLayer img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;}
-  #napLayer.on #nA{opacity:1;}
-  @keyframes xj-nap-a{0%,19.5%{opacity:1;}20%,100%{opacity:0;}}
-  @keyframes xj-nap-b{0%,19.5%{opacity:0;}20%,39.5%{opacity:1;}40%,100%{opacity:0;}}
-  @keyframes xj-nap-c{0%,39.5%{opacity:0;}40%,59.5%{opacity:1;}60%,100%{opacity:0;}}
-  @keyframes xj-nap-d{0%,59.5%{opacity:0;}60%,79.5%{opacity:1;}80%,100%{opacity:0;}}
-  @keyframes xj-nap-e{0%,79.5%{opacity:0;}80%,99.5%{opacity:1;}100%{opacity:0;}}
 </style>
 </head>
 <body>
 <div id="stage">
   <div id="petBox" class="breath">
-    <div id="face">
-      <img id="pA" class="pose show" src="newopen.png" alt="">
-      <img id="pB" class="pose" src="newopen.png" alt="">
-      <img id="wA" class="wpose" src="walkA.png" alt="">
-      <img id="wB" class="wpose" src="walkB.png" alt="">
-      <img id="wC" class="wpose" src="walkC.png" alt="">
-      <img id="wD" class="wpose" src="walkD.png" alt="">
-    </div>
-    <div id="blinkLayer">
-      <img id="bka" src="newhalf.png" alt="">
-      <img id="bkb" src="newclosed.png" alt="">
-    </div>
-    <div id="napLayer">
-      <img id="nA" src="napA.png" alt="">
-      <img id="nB" src="napB.png" alt="">
-      <img id="nC" src="napC.png" alt="">
-      <img id="nD" src="napD.png" alt="">
-      <img id="nE" src="napE.png" alt="">
-    </div>
+    <img id="sit" class="on" src="pet_sit.png" alt="">
+    <img id="nap" src="pet_sleep.png" alt="">
   </div>
   <div id="bubbleWrap"><div id="bubble"></div></div>
 </div>
 <script>
-var IMG = {
-  idle: "newopen.png", hi: "pet_hi.png", hi2: "pet_hi2.png", mad: "pet_mad.png",
-  jealous: "pet_jealous.png", sit: "pet_sit.png", sleep: "napA.png",
-  walkA: "walkA.png", walkB: "walkB.png", walkC: "walkC.png", walkD: "walkD.png", hold: "hold.png",
-  low: "pet_low.png", charge: "pet_charge.png"
-};
 var appLines = {
   "com.ss.android.ugc.aweme": ["又刷上了", "刷多久了，抬个头", "眼睛不要了？", "再看我就生气"],
   "com.ss.android.ugc.aweme.lite": ["连极速版都用上了", "这么想看", "抬头看我一眼"],
@@ -178,22 +111,8 @@ var notiLines = {
   "com.google.android.apps.messaging": ["短信来了", "看看是谁"],
   "org.telegram.messenger": ["Telegram响了", "谁啊"]
 };
-function onNoti(pkg, who) {
-  lastAct = Date.now();
-  if (mode === "walk") return;
-  if (curPose === "sleep") setPose("idle");
-  var pool = notiLines[pkg] || ["有消息来了"];
-  var line = pool[Math.floor(Math.random() * pool.length)];
-  if (who && who.length > 0 && who.length <= 10) line = who + "。谁？";
-  say(line, "rage", 3600);
-  setPose("jealous");
-  flash("xj-shake", 520);
-  backToIdle(3600);
-}
 var tapLines = ["干嘛", "别戳我", "嗯？", "在的", "戳一下算想我", "疼"];
 var idleLines = ["……", "在吗", "看我一眼", "有点无聊", "喂"];
-var walkLines = ["溜达一圈", "看看你在干嘛", "让让", "过来看看"];
-var edgeLines = ["到头了", "没路了", "这堵墙挺好看", "回走"];
 var nightLines = ["几点了", "你还不睡", "眼睛闭上", "陪你熬"];
 var sleepLines = ["……呼", "别吵", "困", "我就眯一会儿"];
 var lowLines = ["快没电了", "我也撑不住了", "省着点用", "剩这点，够干嘛"];
@@ -201,15 +120,10 @@ var chargeLines = ["来电了", "充上了", "有电了，精神", "满了满了
 
 var bubble = document.getElementById("bubble");
 var box = document.getElementById("petBox");
-var face = document.getElementById("face");
-var pA = document.getElementById("pA");
-var pB = document.getElementById("pB");
-var hideTimer = null, poseTimer = null, walkTimer = null;
-var front = pA, back = pB;
-var curPose = "idle";
-var mode = "stand";
-var stepIdx = 0;
-var tapCount = 0, tapTimer = null;
+var sitEl = document.getElementById("sit");
+var napEl = document.getElementById("nap");
+var hideTimer = null, poseTimer = null;
+var curPose = "sit";
 var lastAct = Date.now();
 var powerPct = -1, powerChg = false, powerSaidAt = 0;
 
@@ -228,207 +142,131 @@ function flash(cls, ms) {
   setTimeout(function () { box.classList.remove(cls); }, ms);
 }
 function setPose(name) {
-  if (name === "hi") name = Math.random() < 0.5 ? "hi" : "hi2";
-  if (curPose === name) return;
+  if (name === curPose) return;
   curPose = name;
-  back.onload = function () {
-    back.classList.add("show");
-    front.classList.remove("show");
-    var t = front;
-    front = back;
-    back = t;
-  };
-  back.src = IMG[name];
+  if (name === "sleep") {
+    napEl.classList.add("on");
+    sitEl.classList.remove("on");
+    box.classList.remove("breath", "xj-hop", "xj-shake");
+  } else {
+    sitEl.classList.add("on");
+    napEl.classList.remove("on");
+    box.classList.add("breath");
+  }
 }
-function backToIdle(ms) {
+function wake() {
+  if (curPose === "sleep") setPose("sit");
+}
+function backToSit(ms) {
   if (poseTimer) clearTimeout(poseTimer);
   poseTimer = setTimeout(function () {
-    if (mode !== "walk") setPose("idle");
+    if (curPose !== "sleep") setPose("sit");
   }, ms);
-}
-var facingDir = -1;
-var rotDeg = 0;
-function applyFace() {
-  face.style.transform = "rotate(" + rotDeg + "deg)" + (facingDir > 0 ? " scaleX(-1)" : " scaleX(1)");
-}
-function setFacing(d) {
-  facingDir = d;
-  applyFace();
-}
-function setRotate(d) {
-  rotDeg = d;
-  applyFace();
-}
-function startWalk() {
-  if (mode === "walk") return;
-  if (isLow()) return;
-  mode = "walk";
-  if (poseTimer) clearTimeout(poseTimer);
-  if (walkTimer) { clearInterval(walkTimer); walkTimer = null; }
-  box.classList.remove("breath", "xj-hop", "xj-shake");
-  box.classList.add("stepping");
-  if (Math.random() < 0.16) say(walkLines[Math.floor(Math.random() * walkLines.length)], "", 1800);
-}
-function stopWalk() {
-  if (mode !== "walk") return;
-  mode = "stand";
-  box.classList.remove("stepping");
-  box.classList.add("breath");
-  curPose = "";
-  setPose("idle");
-}
-function isNight() {
-  var h = new Date().getHours();
-  return h >= 23 || h < 6;
-}
-function setPower(pct, chg, hint) {
-  powerPct = pct;
-  powerChg = !!chg;
-  box.classList.toggle("charging", powerChg);
-  box.classList.toggle("lowbatt", isLow());
-  if (isLow() && mode === "walk") stopWalk();
-  curPose = "";
-  if (mode !== "walk") setPose("idle");
-  var now = Date.now();
-  if (hint === 1 && now - powerSaidAt > 30000) {
-    powerSaidAt = now;
-    setPose("charge");
-    say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2600);
-    flash("xj-hop", 620);
-    backToIdle(2200);
-  } else if (hint === 2 && now - powerSaidAt > 30000) {
-    powerSaidAt = now;
-    setPose("low");
-    say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 3400);
-    backToIdle(3200);
-  }
-}
-function onLongPress() {
-  lastAct = Date.now();
-  if (mode === "walk") stopWalk();
-  setPose("hi");
-  say(powerChg ? "充着电呢，别拎我" : "你按着我干嘛", "pink", 2400);
-  flash("xj-hop", 620);
-  backToIdle(2000);
-}
-function onHold(on) {
-  if (on) {
-    box.classList.remove("breath", "stepping");
-    curPose = "";
-    setPose("hold");
-    box.classList.add("held");
-    if (Math.random() < 0.7) say("放我下来", "pink", 1800);
-  } else {
-    box.classList.remove("held");
-    curPose = "";
-    if (mode !== "walk") {
-      box.classList.add("breath");
-      setPose("idle");
-    }
-  }
-}
-function onEdge() {
-  if (mode !== "walk") return;
-  if (Math.random() < 0.4) say(edgeLines[Math.floor(Math.random() * edgeLines.length)], "", 1800);
 }
 function onTap() {
   lastAct = Date.now();
-  if (mode === "walk") stopWalk();
-  tapCount++;
-  if (tapTimer) clearTimeout(tapTimer);
-  tapTimer = setTimeout(function () { tapCount = 0; }, 1600);
-  if (tapCount >= 3) {
-    tapCount = 0;
-    setPose("mad");
-    say("别戳了，疼", "rage", 2200);
-    flash("xj-shake", 520);
-    backToIdle(2400);
-    return;
-  }
   if (curPose === "sleep") {
-    setPose("idle");
+    setPose("sit");
     say("醒了", "pink", 1600);
-    flash("xj-hop", 620);
-    backToIdle(1400);
+    flash("xj-hop", 560);
     return;
   }
-  setPose("hi");
   if (isLow() && Math.random() < 0.5) {
     say("冷落我就可以，别冷落电", "", 2200);
   } else {
     say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
   }
-  flash("xj-hop", 620);
-  backToIdle(1700);
+  flash("xj-hop", 560);
+}
+function onLongPress() {
+  lastAct = Date.now();
+  wake();
+  say(powerChg ? "充着电呢，别拎我" : "你按着我干嘛", "pink", 2400);
+  flash("xj-hop", 560);
+}
+function onHold(on) {
+  lastAct = Date.now();
+  if (on) wake();
+}
+function onNoti(pkg, who) {
+  lastAct = Date.now();
+  wake();
+  var pool = notiLines[pkg] || ["有消息来了"];
+  var line = pool[Math.floor(Math.random() * pool.length)];
+  if (who && who.length > 0 && who.length <= 10) line = who + "。谁？";
+  say(line, "rage", 3600);
+  flash("xj-shake", 520);
 }
 function switchApp(pkg) {
   lastAct = Date.now();
-  if (mode === "walk") return;
   var lines = appLines[pkg];
   var hot = hotApps.indexOf(pkg) >= 0;
-  if (curPose === "sleep") setPose("idle");
+  wake();
   if (lines) {
     say(lines[Math.floor(Math.random() * lines.length)], hot ? "rage" : "pink", 3200);
   } else {
     say(unknownLines[Math.floor(Math.random() * unknownLines.length)], "", 2200);
   }
-  if (hot) {
-    setPose("jealous");
-    flash("xj-shake", 520);
-    backToIdle(3400);
-  } else if (calmApps.indexOf(pkg) >= 0) {
-    setPose("sit");
-    backToIdle(9000);
-  } else {
-    setPose("hi");
-    backToIdle(1800);
+  if (hot) flash("xj-shake", 520);
+  else flash("xj-hop", 560);
+}
+function setPower(pct, chg, hint) {
+  powerPct = pct;
+  powerChg = !!chg;
+  var now = Date.now();
+  if (hint === 1 && now - powerSaidAt > 30000) {
+    powerSaidAt = now;
+    wake();
+    say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2600);
+    flash("xj-hop", 600);
+  } else if (hint === 2 && now - powerSaidAt > 30000) {
+    powerSaidAt = now;
+    wake();
+    say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 3400);
   }
 }
+/* 备用接口：不再走动，留空实现避免旧调用报错 */
+function startWalk() {}
+function stopWalk() {}
+function onEdge() {}
+function setFacing(d) {}
+function setRotate(d) {}
+
+function isNight() {
+  var h = new Date().getHours();
+  return h >= 23 || h < 6;
+}
+
 (function idleLoop() {
   setTimeout(function () {
-    if (mode !== "walk") {
-      if (curPose === "sleep") {
-        say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
-      } else if (bubble.className.indexOf("on") < 0) {
-        if (isLow()) {
-          say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 2800);
-        } else if (powerChg) {
-          say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2400);
-        } else if (isNight()) {
-          say(nightLines[Math.floor(Math.random() * nightLines.length)], "pink", 2600);
-        } else {
-          say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
-        }
+    if (curPose === "sleep") {
+      say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
+    } else if (bubble.className.indexOf("on") < 0) {
+      if (isLow()) {
+        say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 2800);
+      } else if (powerChg) {
+        say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2400);
+      } else if (isNight()) {
+        say(nightLines[Math.floor(Math.random() * nightLines.length)], "pink", 2600);
+      } else {
+        say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
       }
     }
     idleLoop();
   }, 20000 + Math.random() * 12000);
 })();
+
+/* 没人理就缩起来睡：白天 100 秒，夜里 45 秒 */
 setInterval(function () {
-  if (mode !== "walk" && Date.now() - lastAct > 90000 && curPose === "idle") {
-    setPose(isLow() ? "sit" : "sleep");
-  }
-}, 8000);
+  if (curPose !== "sit") return;
+  var wait = isNight() ? 45000 : 100000;
+  if (Date.now() - lastAct > wait) setPose("sleep");
+}, 5000);
+
 setTimeout(function () {
-  setPose("hi");
   say("来了", "pink", 1800);
-  backToIdle(2000);
-}, 2500);
-
-var blinkLayer = document.getElementById("blinkLayer");
-function updateBlink() {
-  blinkLayer.classList.remove("on");
-}
-setInterval(updateBlink, 300);
-
-var napLayer = document.getElementById("napLayer");
-function updateNap() {
-  var on = (mode !== "walk") && curPose === "sleep" &&
-    !box.classList.contains("held") && !box.classList.contains("stepping");
-  napLayer.classList.toggle("on", on);
-  box.classList.toggle("napping", on);
-}
-setInterval(updateNap, 250);
+  flash("xj-hop", 560);
+}, 2200);
 </script>
 </body>
 </html>
