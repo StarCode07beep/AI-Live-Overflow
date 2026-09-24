@@ -11,8 +11,8 @@ android {
         applicationId = "com.starcode.xujin_deskpet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 6
-        versionName = "2.0-two-pose"
+        versionCode = 7
+        versionName = "2.1-bubble-top"
     }
 
     signingConfigs {
