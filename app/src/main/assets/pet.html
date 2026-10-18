@@ -8,7 +8,7 @@
   #stage{position:relative;width:100%;height:100%;}
 
   /* 三副样子：待机站着、趴着睡、坐着听歌。不走动 */
-  #petBox{position:absolute;right:0;bottom:0;width:47%;height:58%;transform-origin:50% 100%;}
+  #petBox{position:absolute;right:0;bottom:0;width:57%;height:70%;transform-origin:50% 100%;}
   #petBox img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;transition:opacity .26s;transform-origin:50% 100%;}
   #petBox img.on{opacity:1;}
 
@@ -33,7 +33,7 @@
   }
 
   /* 气泡挂头顶：底边贴着当前姿势的头顶 */
-  #bubbleWrap{position:absolute;left:0;right:0;bottom:calc(58% + 4px);display:flex;justify-content:flex-end;padding:0 4px;pointer-events:none;}
+  #bubbleWrap{position:absolute;left:0;right:0;bottom:calc(70% + 4px);display:flex;justify-content:flex-end;padding:0 4px;pointer-events:none;}
   #bubble{position:relative;max-width:100%;box-sizing:border-box;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.96);color:#3a3330;font:11px/1.35 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:normal;word-break:break-word;box-shadow:0 1px 4px rgba(0,0,0,.12);}
   #bubble.on{opacity:1;}
   #bubble::after{content:"";position:absolute;right:39px;bottom:-6px;border:6px solid transparent;border-top-color:rgba(255,255,255,.96);border-bottom:none;}
@@ -127,7 +127,7 @@ var musicEl = document.getElementById("music");
 var hideTimer = null, poseTimer = null;
 var curPose = "idle";
 var musicOn = false;
-var petTopPct = 58;
+var petTopPct = 70;
 var dropPx = 0;
 var lastAct = Date.now();
 var powerPct = -1, powerChg = false, powerSaidAt = 0;
@@ -165,7 +165,7 @@ function setPose(name) {
   if (name === "sleep") sleepEl.classList.add("on");
   else if (name === "music") musicEl.classList.add("on");
   else idleEl.classList.add("on");
-  petTopPct = name === "sleep" ? 23 : (name === "music" ? 43 : 58);
+  petTopPct = name === "sleep" ? 27 : (name === "music" ? 52 : 70);
   applyBubblePos();
   box.classList.remove("xj-hop", "xj-shake");
   if (name === "sleep") box.classList.remove("breath");
