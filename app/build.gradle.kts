@@ -11,8 +11,8 @@ android {
         applicationId = "com.starcode.xujin_deskpet"
         minSdk = 26
         targetSdk = 34
-        versionCode = 9
-        versionName = "3.0-new-pet"
+        versionCode = 10
+        versionName = "3.1-bigger"
     }
 
     signingConfigs {
