@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.media.AudioManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Handler
@@ -35,6 +36,7 @@ class PetOverlayService : Service() {
     private val handler = Handler(Looper.getMainLooper())
 
     private var lastPkg = ""
+    private var musicPlaying = false
     private var dragging = false
     private var moved = false
     private var holding = false
@@ -352,6 +354,15 @@ class PetOverlayService : Service() {
                 if (pkg.isNotEmpty() && pkg != lastPkg) {
                     lastPkg = pkg
                     web?.evaluateJavascript("switchApp('$pkg')", null)
+                }
+            } catch (t: Throwable) {
+            }
+            try {
+                val am = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                val playing = am?.isMusicActive == true
+                if (playing != musicPlaying) {
+                    musicPlaying = playing
+                    sendJs("setMusic($playing)")
                 }
             } catch (t: Throwable) {
             }
