@@ -189,7 +189,7 @@ class PetOverlayService : Service() {
 
     private fun clampY(v: Int): Int {
         // 上面留出空间：允许继续往上，宠物头顶能贴到屏幕上沿
-        val minY = -(viewH * 0.42).toInt()
+        val minY = -(viewH * 0.30).toInt()
         val maxY = screenH - (viewH * 0.45).toInt()
         return when {
             v < minY -> minY
@@ -202,7 +202,7 @@ class PetOverlayService : Service() {
     private fun pushBubble() {
         try {
             val dm = resources.displayMetrics
-            val petTop = params.y + (viewH * 0.42).toInt()
+            val petTop = params.y + (viewH * 0.30).toInt()
             val need = (45 * dm.density).toInt() - petTop
             val drop = if (need > 0) (need / dm.density).toInt() else 0
             sendJs("setBubbleDrop($drop)")
