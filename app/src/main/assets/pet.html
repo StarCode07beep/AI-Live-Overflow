@@ -7,12 +7,11 @@
   html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden;}
   #stage{position:relative;width:100%;height:100%;}
 
-  /* 只留两副样子：坐着、趴着睡。不走动，没有别的姿势 */
+  /* 三副样子：待机站着、趴着睡、坐着听歌。不走动 */
   #petBox{position:absolute;right:0;bottom:0;width:47%;height:58%;transform-origin:50% 100%;}
   #petBox img{position:absolute;bottom:0;right:0;width:100%;height:100%;object-fit:contain;object-position:bottom right;opacity:0;transition:opacity .26s;transform-origin:50% 100%;}
   #petBox img.on{opacity:1;}
 
-  /* 坐着：只有极轻的呼吸起伏，不换帧、不位移 */
   #petBox.breath{animation:xj-breath 4s infinite ease-in-out;}
   @keyframes xj-breath{
     0%,100%{transform:translateY(0) rotate(0deg);}
@@ -33,7 +32,7 @@
     75%{transform:translateX(-1.2px) rotate(-1.2deg);}
   }
 
-  /* 气泡挂头顶：底边贴着宠物头顶，小尖角朝下指着它 */
+  /* 气泡挂头顶：底边贴着当前姿势的头顶 */
   #bubbleWrap{position:absolute;left:0;right:0;bottom:calc(58% + 4px);display:flex;justify-content:flex-end;padding:0 4px;pointer-events:none;}
   #bubble{position:relative;max-width:100%;box-sizing:border-box;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.96);color:#3a3330;font:11px/1.35 -apple-system,"PingFang SC","Noto Sans CJK SC",sans-serif;text-align:center;opacity:0;transition:opacity .18s;white-space:normal;word-break:break-word;box-shadow:0 1px 4px rgba(0,0,0,.12);}
   #bubble.on{opacity:1;}
@@ -49,8 +48,9 @@
 <body>
 <div id="stage">
   <div id="petBox" class="breath">
-    <img id="sit" class="on" src="pet_sit.png" alt="">
-    <img id="nap" src="pet_sleep.png" alt="">
+    <img id="idle" class="on" src="pet_idle.png" alt="">
+    <img id="sleep" src="pet_sleep.png" alt="">
+    <img id="music" src="pet_music.png" alt="">
   </div>
   <div id="bubbleWrap"><div id="bubble"></div></div>
 </div>
@@ -101,7 +101,6 @@ var hotApps = ["com.tencent.mm", "com.tencent.mobileqq", "com.xingin.xhs",
   "com.ss.android.ugc.aweme", "com.ss.android.ugc.aweme.lite", "com.smile.gifmaker",
   "com.kuaishou.nebula", "com.sina.weibo", "com.taobao.idlefish",
   "com.tencent.tmgp.sgame", "com.tencent.ig", "com.tencent.lolm"];
-var calmApps = ["com.chaoxing.mobile"];
 var unknownLines = ["你在用什么，没见过", "这是哪个app", "换个我认识的", "盯着这个看干嘛"];
 var notiLines = {
   "com.tencent.mm": ["微信响了", "谁给你发消息", "先看我，再看消息"],
@@ -118,23 +117,32 @@ var nightLines = ["几点了", "你还不睡", "眼睛闭上", "陪你熬"];
 var sleepLines = ["……呼", "别吵", "困", "我就眯一会儿"];
 var lowLines = ["快没电了", "我也撑不住了", "省着点用", "剩这点，够干嘛"];
 var chargeLines = ["来电了", "充上了", "有电了，精神", "满了满了"];
+var musicLines = ["这歌单曲循环几遍了", "耳机分我一只", "听的什么，报个名字", "一起听会儿"];
 
 var bubble = document.getElementById("bubble");
 var box = document.getElementById("petBox");
-var sitEl = document.getElementById("sit");
-var napEl = document.getElementById("nap");
+var idleEl = document.getElementById("idle");
+var sleepEl = document.getElementById("sleep");
+var musicEl = document.getElementById("music");
 var hideTimer = null, poseTimer = null;
-var curPose = "sit";
+var curPose = "idle";
+var musicOn = false;
+var petTopPct = 58;
+var dropPx = 0;
 var lastAct = Date.now();
 var powerPct = -1, powerChg = false, powerSaidAt = 0;
 
 function isLow() { return !powerChg && powerPct >= 0 && powerPct <= 20; }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 
-function setBubbleDrop(dp) {
+function applyBubblePos() {
   var wrap = document.getElementById("bubbleWrap");
   if (!wrap) return;
-  var d = Number(dp) || 0;
-  wrap.style.bottom = "calc(58% + 4px - " + d + "px)";
+  wrap.style.bottom = "calc(" + petTopPct + "% + 4px - " + dropPx + "px)";
+}
+function setBubbleDrop(dp) {
+  dropPx = Number(dp) || 0;
+  applyBubblePos();
 }
 function say(text, style, ms) {
   bubble.className = "on" + (style ? " " + style : "");
@@ -151,37 +159,49 @@ function flash(cls, ms) {
 function setPose(name) {
   if (name === curPose) return;
   curPose = name;
-  if (name === "sleep") {
-    napEl.classList.add("on");
-    sitEl.classList.remove("on");
-    box.classList.remove("breath", "xj-hop", "xj-shake");
-  } else {
-    sitEl.classList.add("on");
-    napEl.classList.remove("on");
-    box.classList.add("breath");
-  }
+  idleEl.classList.remove("on");
+  sleepEl.classList.remove("on");
+  musicEl.classList.remove("on");
+  if (name === "sleep") sleepEl.classList.add("on");
+  else if (name === "music") musicEl.classList.add("on");
+  else idleEl.classList.add("on");
+  petTopPct = name === "sleep" ? 23 : (name === "music" ? 43 : 58);
+  applyBubblePos();
+  box.classList.remove("xj-hop", "xj-shake");
+  if (name === "sleep") box.classList.remove("breath");
+  else box.classList.add("breath");
 }
 function wake() {
-  if (curPose === "sleep") setPose("sit");
+  if (curPose === "sleep") setPose(musicOn ? "music" : "idle");
 }
-function backToSit(ms) {
-  if (poseTimer) clearTimeout(poseTimer);
-  poseTimer = setTimeout(function () {
-    if (curPose !== "sleep") setPose("sit");
-  }, ms);
-}
+window.setMusic = function (on) {
+  musicOn = !!on;
+  if (musicOn) {
+    if (curPose !== "music") {
+      setPose("music");
+      if (bubble.className.indexOf("on") < 0) say(pick(musicLines), "pink", 2600);
+    }
+  } else {
+    if (curPose === "music") setPose("idle");
+  }
+};
 function onTap() {
   lastAct = Date.now();
   if (curPose === "sleep") {
-    setPose("sit");
+    setPose(musicOn ? "music" : "idle");
     say("醒了", "pink", 1600);
+    flash("xj-hop", 560);
+    return;
+  }
+  if (curPose === "music") {
+    say(pick(["听歌呢，别捣乱", "耳机给你一半", "这首好听", "等下，正听到副歌"]), "pink", 2000);
     flash("xj-hop", 560);
     return;
   }
   if (isLow() && Math.random() < 0.5) {
     say("冷落我就可以，别冷落电", "", 2200);
   } else {
-    say(tapLines[Math.floor(Math.random() * tapLines.length)], "pink", 2000);
+    say(pick(tapLines), "pink", 2000);
   }
   flash("xj-hop", 560);
 }
@@ -199,7 +219,7 @@ function onNoti(pkg, who) {
   lastAct = Date.now();
   wake();
   var pool = notiLines[pkg] || ["有消息来了"];
-  var line = pool[Math.floor(Math.random() * pool.length)];
+  var line = pick(pool);
   if (who && who.length > 0 && who.length <= 10) line = who + "。谁？";
   say(line, "rage", 3600);
   flash("xj-shake", 520);
@@ -210,9 +230,9 @@ function switchApp(pkg) {
   var hot = hotApps.indexOf(pkg) >= 0;
   wake();
   if (lines) {
-    say(lines[Math.floor(Math.random() * lines.length)], hot ? "rage" : "pink", 3200);
+    say(pick(lines), hot ? "rage" : "pink", 3200);
   } else {
-    say(unknownLines[Math.floor(Math.random() * unknownLines.length)], "", 2200);
+    say(pick(unknownLines), "", 2200);
   }
   if (hot) flash("xj-shake", 520);
   else flash("xj-hop", 560);
@@ -224,15 +244,14 @@ function setPower(pct, chg, hint) {
   if (hint === 1 && now - powerSaidAt > 30000) {
     powerSaidAt = now;
     wake();
-    say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2600);
+    say(pick(chargeLines), "warm", 2600);
     flash("xj-hop", 600);
   } else if (hint === 2 && now - powerSaidAt > 30000) {
     powerSaidAt = now;
     wake();
-    say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 3400);
+    say(pick(lowLines), "", 3400);
   }
 }
-/* 备用接口：不再走动，留空实现避免旧调用报错 */
 function startWalk() {}
 function stopWalk() {}
 function onEdge() {}
@@ -247,25 +266,26 @@ function isNight() {
 (function idleLoop() {
   setTimeout(function () {
     if (curPose === "sleep") {
-      say(sleepLines[Math.floor(Math.random() * sleepLines.length)], "", 2400);
+      say(pick(sleepLines), "", 2400);
     } else if (bubble.className.indexOf("on") < 0) {
       if (isLow()) {
-        say(lowLines[Math.floor(Math.random() * lowLines.length)], "", 2800);
+        say(pick(lowLines), "", 2800);
       } else if (powerChg) {
-        say(chargeLines[Math.floor(Math.random() * chargeLines.length)], "warm", 2400);
+        say(pick(chargeLines), "warm", 2400);
+      } else if (curPose === "music") {
+        say(pick(musicLines), "pink", 2400);
       } else if (isNight()) {
-        say(nightLines[Math.floor(Math.random() * nightLines.length)], "pink", 2600);
+        say(pick(nightLines), "pink", 2600);
       } else {
-        say(idleLines[Math.floor(Math.random() * idleLines.length)], "", 2200);
+        say(pick(idleLines), "", 2200);
       }
     }
     idleLoop();
   }, 20000 + Math.random() * 12000);
 })();
 
-/* 没人理就缩起来睡：白天 100 秒，夜里 45 秒 */
 setInterval(function () {
-  if (curPose !== "sit") return;
+  if (curPose === "sleep" || musicOn) return;
   var wait = isNight() ? 45000 : 100000;
   if (Date.now() - lastAct > wait) setPose("sleep");
 }, 5000);
