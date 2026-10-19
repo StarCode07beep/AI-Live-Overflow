@@ -49,6 +49,7 @@
 <div id="stage">
   <div id="petBox" class="breath">
     <img id="idle" class="on" src="pet_idle.png" alt="">
+    <img id="angry" src="pet_angry.png" alt="">
     <img id="sleep" src="pet_sleep.png" alt="">
     <img id="music" src="pet_music.png" alt="">
   </div>
@@ -124,6 +125,7 @@ var box = document.getElementById("petBox");
 var idleEl = document.getElementById("idle");
 var sleepEl = document.getElementById("sleep");
 var musicEl = document.getElementById("music");
+var angryEl = document.getElementById("angry");
 var hideTimer = null, poseTimer = null;
 var curPose = "idle";
 var musicOn = false;
@@ -162,14 +164,23 @@ function setPose(name) {
   idleEl.classList.remove("on");
   sleepEl.classList.remove("on");
   musicEl.classList.remove("on");
+  angryEl.classList.remove("on");
   if (name === "sleep") sleepEl.classList.add("on");
   else if (name === "music") musicEl.classList.add("on");
+  else if (name === "angry") angryEl.classList.add("on");
   else idleEl.classList.add("on");
-  petTopPct = name === "sleep" ? 27 : (name === "music" ? 52 : 70);
+  petTopPct = name === "sleep" ? 28 : (name === "music" ? 58 : (name === "angry" ? 58 : 63));
   applyBubblePos();
   box.classList.remove("xj-hop", "xj-shake");
   if (name === "sleep") box.classList.remove("breath");
   else box.classList.add("breath");
+}
+function angerFlash(ms) {
+  setPose("angry");
+  if (poseTimer) clearTimeout(poseTimer);
+  poseTimer = setTimeout(function () {
+    if (curPose === "angry") setPose(musicOn ? "music" : "idle");
+  }, ms || 3200);
 }
 function wake() {
   if (curPose === "sleep") setPose(musicOn ? "music" : "idle");
@@ -222,6 +233,7 @@ function onNoti(pkg, who) {
   var line = pick(pool);
   if (who && who.length > 0 && who.length <= 10) line = who + "。谁？";
   say(line, "rage", 3600);
+  angerFlash(3600);
   flash("xj-shake", 520);
 }
 function switchApp(pkg) {
@@ -234,7 +246,7 @@ function switchApp(pkg) {
   } else {
     say(pick(unknownLines), "", 2200);
   }
-  if (hot) flash("xj-shake", 520);
+  if (hot) { angerFlash(3200); flash("xj-shake", 520); }
   else flash("xj-hop", 560);
 }
 function setPower(pct, chg, hint) {
